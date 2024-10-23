@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PropertyValues } from 'lit-element';
 import { HomeAssistant } from 'custom-card-helpers';
 import { BarCardConfig } from './types';
@@ -36,9 +37,9 @@ export function mapRange(num: number, in_min: number, in_max: number, out_min: n
 }
 
 export function getMaxMinBasedOnType(hass: HomeAssistant | undefined, value: number | string): number {
-  if (typeof value === "number") {
+  if (typeof value === 'number') {
     return value;
-  } 
+  }
   if (hass === undefined) {
     return 0;
   }
@@ -48,7 +49,7 @@ export function getMaxMinBasedOnType(hass: HomeAssistant | undefined, value: num
       return 0;
     }
     return parsedValue
-  } 
+  }
   return 0;
 }
 
@@ -73,7 +74,7 @@ export function hasConfigOrEntitiesChanged(element: any, changedProps: PropertyV
   return false;
 }
 
-export function createConfigArray(config): BarCardConfig[] {
+export function createConfigArray(config: BarCardConfig): BarCardConfig[] {
   const configArray: BarCardConfig[] = [];
   if (config.entities) {
     for (const entityConfig of config.entities) {
@@ -95,7 +96,7 @@ export function createConfigArray(config): BarCardConfig[] {
   return configArray;
 }
 
-export function createEditorConfigArray(config): BarCardConfig[] {
+export function createEditorConfigArray(config: BarCardConfig): BarCardConfig[] {
   const configArray: BarCardConfig[] = [];
   if (config.entities) {
     for (const entityConfig of config.entities) {
@@ -113,7 +114,7 @@ export function createEditorConfigArray(config): BarCardConfig[] {
   return configArray;
 }
 
-export function arrayMove(arr, fromIndex, toIndex): any[] {
+export function arrayMove(arr: any[], fromIndex: number, toIndex: number): any[] {
   const element = arr[fromIndex];
   const newArray = arr.slice();
   newArray.splice(fromIndex, 1);

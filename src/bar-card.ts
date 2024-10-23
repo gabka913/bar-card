@@ -1,30 +1,24 @@
-import { LitElement, html, customElement, property, TemplateResult, PropertyValues } from 'lit-element';
-import {
-  HomeAssistant,
-  hasAction,
-  handleAction,
-  LovelaceCardEditor,
-  domainIcon,
-  computeDomain,
-} from 'custom-card-helpers';
-
 import './editor';
 
 import { BarCardConfig } from './types';
 import { actionHandler } from './action-handler-directive';
-import { CARD_VERSION } from './const';
 import { localize } from './localize/localize';
 import { mergeDeep, hasConfigOrEntitiesChanged, createConfigArray, getMaxMinBasedOnType } from './helpers';
 import { styles } from './styles';
+import { LovelaceCardEditor, HomeAssistant, domainIcon, computeDomain, hasAction, handleAction, Config } from 'custom-card-helpers';
+import { LitElement, PropertyValues } from 'lit-element';
+import { customElement } from 'lit-element/decorators';
+import { TemplateResult, html } from 'lit-html';
 
-/* eslint no-console: 0 */
-console.info(
-  `%c  BAR-CARD \n%c  ${localize('common.version')} ${CARD_VERSION}    `,
-  'color: orange; font-weight: bold; background: black',
-  'color: white; font-weight: bold; background: dimgray',
-);
+interface Section {
+  text: string
+  color: string
+  from: number
+  to: number
+  icon: boolean
+  hide: boolean
+}
 
-// TODO Name your custom element
 @customElement('bar-card')
 export class BarCard extends LitElement {
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
@@ -35,11 +29,11 @@ export class BarCard extends LitElement {
     return {};
   }
 
-  @property() public hass?: HomeAssistant;
-  @property() private _config!: BarCardConfig;
-  @property() private _configArray: BarCardConfig[] = [];
-  private _stateArray: any[] = [];
-  private _animationState: any[] = [];
+  public hass: HomeAssistant | undefined;
+  private _config!: BarCardConfig;
+  private _configArray: BarCardConfig[] = [];
+  private _stateArray: string[] = [];
+  private _animationState: string[] = [];
   private _rowAmount = 1;
 
   protected shouldUpdate(changedProps: PropertyValues): boolean {
@@ -92,8 +86,8 @@ export class BarCard extends LitElement {
           id="states"
           class="card-content"
           style="${this._config.entity_row ? 'padding: 0px;' : ''} ${this._config.direction == 'up'
-            ? ''
-            : 'flex-grow: 0;'}"
+        ? ''
+        : 'flex-grow: 0;'}"
         >
           ${this._createBarArray()}
         </div>
@@ -129,7 +123,7 @@ export class BarCard extends LitElement {
               ${localize('common.entity_not_available')}: ${config.entity}
             </div>
           `);
-          continue;
+          continue
         }
 
         // If attribute is defined use attribute value as bar value.
@@ -177,14 +171,14 @@ export class BarCard extends LitElement {
           case 'right':
             barDirection = 'right';
             markerDirection = 'left';
-            break;
+            break
           case 'up':
             backgroundMargin = '0px';
             barDirection = 'top';
             flexDirection = 'column-reverse';
             markerDirection = 'bottom';
             markerStyle = 'height: 2px; width: 100%;';
-            break;
+            break
         }
 
         // Set icon position html.
@@ -207,7 +201,7 @@ export class BarCard extends LitElement {
                 <ha-icon icon="${icon}"></ha-icon>
               </bar-card-iconbar>
             `;
-            break;
+            break
           case 'inside':
             iconInside = html`
               <bar-card-iconbar>
@@ -215,10 +209,10 @@ export class BarCard extends LitElement {
               </bar-card-iconbar>
             `;
             backgroundMargin = '0px';
-            break;
+            break
           case 'off':
             backgroundMargin = '0px';
-            break;
+            break
         }
 
         // Check for configured name otherwise use friendly name.
@@ -237,12 +231,12 @@ export class BarCard extends LitElement {
               >
             `;
             backgroundMargin = '0px';
-            break;
+            break
           case 'inside':
             nameInside = html`
               <bar-card-name>${name}</bar-card-name>
             `;
-            break;
+            break
           case 'off':
             break;
         }
@@ -269,7 +263,7 @@ export class BarCard extends LitElement {
               <bar-card-divider>/</bar-card-divider>
               <bar-card-max>${max}${unitOfMeasurement}</bar-card-max>
             `;
-            break;
+            break
           case 'inside':
             minMaxInside = html`
               <bar-card-min class="${config.direction == 'up' ? 'min-direction-up' : 'min-direction-right'}"
@@ -278,7 +272,7 @@ export class BarCard extends LitElement {
               <bar-card-divider>/</bar-card-divider>
               <bar-card-max> ${max}${unitOfMeasurement}</bar-card-max>
             `;
-            break;
+            break
           case 'off':
             break;
         }
@@ -293,22 +287,22 @@ export class BarCard extends LitElement {
                 >${config.complementary ? max - entityState : entityState} ${unitOfMeasurement}</bar-card-value
               >
             `;
-            break;
+            break
           case 'inside':
             valueInside = html`
               <bar-card-value
                 class="${config.positions.minmax == 'inside'
-                  ? ''
-                  : config.direction == 'up'
+                ? ''
+                : config.direction == 'up'
                   ? 'value-direction-up'
                   : 'value-direction-right'}"
                 >${config.complementary ? max - entityState : entityState} ${unitOfMeasurement}</bar-card-value
               >
             `;
-            break;
+            break
           case 'off':
             backgroundMargin = '0px';
-            break;
+            break
         }
 
         // Set indicator and animation state based on value change.
@@ -343,12 +337,12 @@ export class BarCard extends LitElement {
                 >${indicatorText}</bar-card-indicator
               >
             `;
-            break;
+            break
           case 'inside':
             indicatorInside = html`
               <bar-card-indicator style="--bar-color: ${barColor};">${indicatorText}</bar-card-indicator>
             `;
-            break;
+            break
           case 'off':
             break;
         }
@@ -387,32 +381,32 @@ export class BarCard extends LitElement {
             style="flex-direction: ${flexDirection}; align-items: ${alignItems};"
             @action=${this._handleAction}
             .config=${config}
-            .actionHandler=${actionHandler({
-              hasHold: hasAction(config.hold_action),
-              hasDoubleClick: hasAction(config.double_tap_action),
-            })}
+            .actionHandler=${actionHandler(this, {
+          hasHold: hasAction(config.hold_action),
+          hasDoubleClick: hasAction(config.double_tap_action),
+        })}
           >
             ${iconOutside} ${indicatorOutside} ${nameOutside}
             <bar-card-background
               style="margin: ${backgroundMargin}; height: ${barHeight}${typeof barHeight == 'number'
-                ? 'px'
-                : ''}; ${barWidth}"
+            ? 'px'
+            : ''}; ${barWidth}"
             >
               <bar-card-backgroundbar style="--bar-color: ${barColor};"></bar-card-backgroundbar>
               ${config.animation.state == 'on'
-                ? html`
+            ? html`
                     <bar-card-animationbar
                       style="animation: ${animation} ${config.animation
-                        .speed}s infinite ease-out; --bar-percent: ${animationPercent}%; --bar-color: ${barColor}; --animation-direction: ${animationDirection};"
+                .speed}s infinite ease-out; --bar-percent: ${animationPercent}%; --bar-color: ${barColor}; --animation-direction: ${animationDirection};"
                       class="${animationClass}"
                     ></bar-card-animationbar>
                   `
-                : ''}
+            : ''}
               <bar-card-currentbar
                 style="--bar-color: ${barColor}; --bar-percent: ${barPercent}%; --bar-direction: ${barDirection}"
               ></bar-card-currentbar>
               ${config.target
-                ? html`
+            ? html`
                     <bar-card-targetbar
                       style="--bar-color: ${barColor}; --bar-percent: ${targetStartPercent}%; --bar-target-percent: ${targetEndPercent}%; --bar-direction: ${barDirection};"
                     ></bar-card-targetbar>
@@ -420,7 +414,7 @@ export class BarCard extends LitElement {
                       style="--bar-color: ${barColor}; --bar-target-percent: ${targetMarkerPercent}%; ${markerDirection}: calc(${targetMarkerPercent}% - 1px); ${markerStyle}}"
                     ></bar-card-markerbar>
                   `
-                : ''}
+            : ''}
               <bar-card-contentbar
                 class="${config.direction == 'up' ? 'contentbar-direction-up' : 'contentbar-direction-right'}"
               >
@@ -456,7 +450,7 @@ export class BarCard extends LitElement {
 
   private _computeBarColor(value: string, index: number): string {
     const config = this._configArray[index];
-    let barColor;
+    let barColor: string
     if (config.severity) {
       barColor = this._computeSeverityColor(value, index);
     } else if (value == 'unavailable') {
@@ -467,20 +461,20 @@ export class BarCard extends LitElement {
     return barColor;
   }
 
-  private _computeSeverityColor(value: string, index: number): unknown {
+  private _computeSeverityColor(value: string, index: number): string {
     const config = this._configArray[index];
     const numberValue = Number(value);
     const sections = config.severity;
     let color: undefined | string;
 
     if (isNaN(numberValue)) {
-      sections.forEach(section => {
+      sections.forEach((section: Section) => {
         if (value == section.text) {
           color = section.color;
         }
       });
     } else {
-      sections.forEach(section => {
+      sections.forEach((section: Section) => {
         if (numberValue >= section.from && numberValue <= section.to) {
           color = section.color;
         }
@@ -498,13 +492,13 @@ export class BarCard extends LitElement {
     let hide = false;
 
     if (isNaN(numberValue)) {
-      sections.forEach(section => {
+      sections.forEach((section: Section) => {
         if (value == section.text) {
           hide = section.hide;
         }
       });
     } else {
-      sections.forEach(section => {
+      sections.forEach((section: Section) => {
         if (numberValue >= section.from && numberValue <= section.to) {
           hide = section.hide;
         }
@@ -522,13 +516,13 @@ export class BarCard extends LitElement {
     if (!sections) return false;
 
     if (isNaN(numberValue)) {
-      sections.forEach(section => {
+      sections.forEach((section: Section) => {
         if (value == section.text) {
           icon = section.icon;
         }
       });
     } else {
-      sections.forEach(section => {
+      sections.forEach((section: Section) => {
         if (numberValue >= section.from && numberValue <= section.to) {
           icon = section.icon;
         }
@@ -555,9 +549,9 @@ export class BarCard extends LitElement {
     }
   }
 
-  private _handleAction(ev): void {
-    if (this.hass && ev.target.config && ev.detail.action) {
-      handleAction(this, this.hass, ev.target.config, ev.detail.action);
+  private _handleAction(event: { target: { config: Config }, detail: { action: string } }): void {
+    if (this.hass && event.target.config && event.detail.action) {
+      handleAction(this, this.hass, event.target.config, event.detail.action);
     }
   }
 

@@ -1,16 +1,45 @@
-import { LitElement, html, customElement, property, TemplateResult, CSSResult, css, PropertyValues } from 'lit-element';
-import { HomeAssistant, fireEvent, LovelaceCardEditor, ActionConfig } from 'custom-card-helpers';
-
 import { BarCardConfig } from './types';
-import { createEditorConfigArray, arrayMove, hasConfigOrEntitiesChanged, getMaxMinBasedOnType } from './helpers';
+import { createEditorConfigArray, arrayMove, hasConfigOrEntitiesChanged } from './helpers';
+import { LovelaceCardEditor, HomeAssistant, fireEvent } from 'custom-card-helpers';
+import { LitElement, PropertyValues, CSSResult, css } from 'lit-element';
+import { customElement } from 'lit-element/decorators';
+import { TemplateResult, html } from 'lit-html';
 
 @customElement('bar-card-editor')
 export class BarCardEditor extends LitElement implements LovelaceCardEditor {
-  @property() public hass?: HomeAssistant;
-  @property() private _config;
-  @property() private _toggle?: boolean;
+  public hass?: HomeAssistant;
+  private _config: BarCardConfig = {
+    entity_config: false,
+    animation: undefined,
+    attribute: undefined,
+    color: '',
+    columns: 0,
+    complementary: false,
+    decimal: undefined,
+    direction: '',
+    entities: undefined,
+    entity_row: false,
+    entity: '',
+    height: '',
+    icon: undefined,
+    limit_value: false,
+    max: '',
+    min: '',
+    name: '',
+    positions: undefined,
+    severity: undefined,
+    stack: '',
+    target: undefined,
+    title: '',
+    type: '',
+    unit_of_measurement: '',
+    width: ''
+  };
+  private _toggle?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _configArray: any[] = [];
   private _entityOptionsArray: object[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _options: any;
 
   protected shouldUpdate(changedProps: PropertyValues): boolean {
@@ -26,7 +55,6 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     if (this._config.entity) {
       this._configArray.push({ entity: config.entity });
       this._config.entities = [{ entity: config.entity }];
-      delete this._config.entity;
     }
 
     this._configArray = createEditorConfigArray(this._config);
@@ -120,7 +148,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
       },
     };
 
-    for (const config of this._configArray) {
+    for (const { } of this._configArray) {
       this._entityOptionsArray.push({ ...entityOptions });
     }
     if (!this._options) {
@@ -158,8 +186,8 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     `;
   }
 
-  private _createActionsElement(index): TemplateResult {
-    const options = this._options.entities.options.entities[index].options.actions;
+  private _createActionsElement(index: number): TemplateResult {
+    const options = this._options?.entities.options.entities[index].options.actions;
     return html`
       <div class="sub-category" style="opacity: 0.5;">
         <div>
@@ -179,7 +207,6 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     }
 
     const options = this._options.entities;
-    const entities = Object.keys(this.hass.states);
     const valueElementArray: TemplateResult[] = [];
     for (const config of this._configArray) {
       const index = this._configArray.indexOf(config);
@@ -214,7 +241,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
             </paper-input>
           </div>
           ${index !== 0
-            ? html`
+          ? html`
                 <ha-icon
                   class="ha-icon-large"
                   icon="mdi:arrow-up"
@@ -226,11 +253,11 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                   .index=${index}
                 ></ha-icon>
               `
-            : html`
+          : html`
                 <ha-icon icon="mdi:arrow-up" style="opacity: 25%;" class="ha-icon-large"></ha-icon>
               `}
           ${index !== this._configArray.length - 1
-            ? html`
+          ? html`
                 <ha-icon
                   class="ha-icon-large"
                   icon="mdi:arrow-down"
@@ -242,7 +269,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                   .index=${index}
                 ></ha-icon>
               `
-            : html`
+          : html`
                 <ha-icon icon="mdi:arrow-down" style="opacity: 25%;" class="ha-icon-large"></ha-icon>
               `}
           <ha-icon
@@ -285,7 +312,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
           <div class="secondary">${options.secondary}</div>
         </div>
         ${options.show
-          ? html`
+        ? html`
               <div class="card-background" style="max-height: 400px; overflow: auto;">
                 ${this._createEntitiesValues()}
                 <div class="sub-category" style="display: flex; flex-direction: column; align-items: flex-end;">
@@ -300,7 +327,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                 </div>
               </div>
             `
-          : ''}
+        : ''}
       </div>
     `;
   }
@@ -322,21 +349,20 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
           </div>
           <div class="secondary">${options.secondary}</div>
         </div>
-        ${
-          options.show
-            ? html`
+        ${options.show
+        ? html`
                 <div class="card-background">
                   ${this._createCardElement()} ${this._createBarElement(null)} ${this._createValueElement(null)}
                   ${this._createPositionsElement(null)} ${this._createSeverityElement(null)}
                   ${this._createAnimationElement(null)}
                 </div>
               `
-            : ''
-        }
+        : ''
+      }
       </div>`;
   }
 
-  private _createBarElement(index): TemplateResult {
+  private _createBarElement(index: number | null): TemplateResult {
     let options;
     let config;
     if (index !== null) {
@@ -362,7 +388,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
           <div class="secondary">${options.secondary}</div>
         </div>
         ${options.show
-          ? html`
+        ? html`
               <div class="value">
                 <div>
                   <paper-dropdown-menu
@@ -382,7 +408,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                     </paper-listbox>
                   </paper-dropdown-menu>
                   ${config.direction
-                    ? html`
+            ? html`
                         <ha-icon
                           class="ha-icon-large"
                           icon="mdi:close"
@@ -392,10 +418,10 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                           .configObject=${config}
                         ></ha-icon>
                       `
-                    : ''}
+            : ''}
                 </div>
                 ${index !== null
-                  ? html`
+            ? html`
                       <paper-input
                         label="Name"
                         .value="${config.name ? config.name : ''}"
@@ -405,7 +431,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                         @value-changed=${this._valueChanged}
                       ></paper-input>
                     `
-                  : ''}
+            : ''}
                 <paper-input
                   label="Icon"
                   .value="${config.icon ? config.icon : ''}"
@@ -440,12 +466,12 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                 ></paper-input>
               </div>
             `
-          : ''}
+        : ''}
       </div>
     `;
   }
 
-  private _createAnimationElement(index): TemplateResult {
+  private _createAnimationElement(index: number | null): TemplateResult {
     let options;
     let config;
     if (index !== null) {
@@ -472,8 +498,8 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
           <div class="secondary">${options.secondary}</div>
         </div>
         ${options.show
-          ? config.animation
-            ? html`
+        ? config.animation
+          ? html`
                 <div class="value">
                   <div>
                     <paper-dropdown-menu
@@ -494,7 +520,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                       </paper-listbox>
                     </paper-dropdown-menu>
                     ${config.animation.state
-                      ? html`
+              ? html`
                           <ha-icon
                             class="ha-icon-large"
                             icon="mdi:close"
@@ -505,7 +531,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                             .index=${index}
                           ></ha-icon>
                         `
-                      : ''}
+              : ''}
                   </div>
                   <paper-input
                     label="Speed"
@@ -518,7 +544,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                   ></paper-input>
                 </div>
               `
-            : html`
+          : html`
                 <div class="value">
                   <div>
                     <paper-dropdown-menu
@@ -548,12 +574,12 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                   ></paper-input>
                 </div>
               `
-          : ''}
+        : ''}
       </div>
     `;
   }
 
-  private _createSeverityElement(index): TemplateResult {
+  private _createSeverityElement(index: number | null): TemplateResult {
     let options;
     let config;
     if (index !== null) {
@@ -580,24 +606,24 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
           <div class="secondary">${options.secondary}</div>
         </div>
         ${options.show
-          ? html`
+        ? html`
               <div class="card-background" style="overflow: auto; max-height: 420px;">
                 ${arrayLength > 0
-                  ? html`
+            ? html`
                       ${this._createSeverityValues(index)}
                     `
-                  : ''}
+            : ''}
                 <div class="sub-category" style="display: flex; flex-direction: column; align-items: flex-end;">
                   <ha-fab mini icon="mdi:plus" @click=${this._addSeverity} .index=${index}></ha-fab>
                 </div>
               </div>
             `
-          : ''}
+        : ''}
       </div>
     `;
   }
 
-  private _createSeverityValues(index): TemplateResult[] {
+  private _createSeverityValues(index: number | null): TemplateResult[] {
     let config;
     if (index === null) {
       config = this._config;
@@ -653,7 +679,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
               ></paper-input>
             </div>
             ${severity.hide
-              ? html`
+          ? html`
                   <ha-switch
                     checked
                     .severityAttribute=${'hide'}
@@ -664,7 +690,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                     >Hide</ha-switch
                   >
                 `
-              : html`
+          : html`
                   <ha-switch
                     unchecked
                     .severityAttribute=${'hide'}
@@ -678,7 +704,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
           </div>
           <div style="display: flex;">
             ${severityIndex !== 0
-              ? html`
+          ? html`
                   <ha-icon
                     class="ha-icon-large"
                     icon="mdi:arrow-up"
@@ -688,11 +714,11 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                     .severityIndex=${severityIndex}
                   ></ha-icon>
                 `
-              : html`
+          : html`
                   <ha-icon icon="mdi:arrow-up" style="opacity: 25%;" class="ha-icon-large"></ha-icon>
                 `}
             ${severityIndex !== config.severity.length - 1
-              ? html`
+          ? html`
                   <ha-icon
                     class="ha-icon-large"
                     icon="mdi:arrow-down"
@@ -702,7 +728,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                     .severityIndex=${severityIndex}
                   ></ha-icon>
                 `
-              : html`
+          : html`
                   <ha-icon icon="mdi:arrow-down" style="opacity: 25%;" class="ha-icon-large"></ha-icon>
                 `}
             <ha-icon
@@ -723,8 +749,8 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     if (!this.hass) {
       return html``;
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: any = this._config;
-    const index = null;
     const options = this._options.appearance.options.card;
     return html`
       <div class="category" id="card">
@@ -742,7 +768,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
           <div class="secondary">${options.secondary}</div>
         </div>
         ${options.show
-          ? html`
+        ? html`
               <div class="value-container">
                 <paper-input
                   editable
@@ -763,7 +789,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                 ></paper-input>
                 <div>
                   ${config.entity_row
-                    ? html`
+            ? html`
                         <ha-switch
                           checked
                           .configAttribute=${'entity_row'}
@@ -773,7 +799,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                           >Entity Row</ha-switch
                         >
                       `
-                    : html`
+            : html`
                         <ha-switch
                           unchecked
                           .configAttribute=${'entity_row'}
@@ -786,12 +812,12 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                 </div>
               </div>
             `
-          : ''}
+        : ''}
       </div>
     `;
   }
 
-  private _createPositionsValues(index): TemplateResult[] {
+  private _createPositionsValues(index: number | null): TemplateResult[] {
     const defaultPositions = {
       icon: 'outside',
       indicator: 'outside',
@@ -861,19 +887,16 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     return positionElementsArray;
   }
 
-  private _createPositionsElement(index): TemplateResult {
+  private _createPositionsElement(index: number | null): TemplateResult {
     if (!this.hass) {
       return html``;
     }
 
     let options;
-    let config;
     if (index === null) {
       options = this._options.appearance.options.positions;
-      config = this._config;
     } else {
       options = this._options.entities.options.entities[index].options.positions;
-      config = this._configArray[index];
     }
     return html`
       <div class="category">
@@ -891,15 +914,15 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
           <div class="secondary">${options.secondary}</div>
         </div>
         ${options.show
-          ? html`
+        ? html`
               ${this._createPositionsValues(index)}
             `
-          : ``}
+        : ``}
       </div>
     `;
   }
 
-  private _createValueElement(index): TemplateResult {
+  private _createValueElement(index: number | null): TemplateResult {
     if (!this.hass) {
       return html``;
     }
@@ -930,10 +953,10 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
           <div class="secondary">${options.secondary}</div>
         </div>
         ${options.show
-          ? html`
+        ? html`
               <div class="value">
                 ${config.limit_value
-                  ? html`
+            ? html`
                       <ha-switch
                         checked
                         .configAttribute=${'limit_value'}
@@ -943,7 +966,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                         >Limit Value</ha-switch
                       >
                     `
-                  : html`
+            : html`
                       <ha-switch
                         unchecked
                         .configObject=${config}
@@ -954,7 +977,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                       >
                     `}
                 ${config.complementary
-                  ? html`
+            ? html`
                       <ha-switch
                         checked
                         .configAttribute=${'complementary'}
@@ -964,7 +987,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                         >Complementary</ha-switch
                       >
                     `
-                  : html`
+            : html`
                       <ha-switch
                         unchecked
                         .configObject=${config}
@@ -1032,22 +1055,23 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
                 ></paper-input>
               </div>
             `
-          : ''}
+        : ''}
       </div>
     `;
   }
 
-  private _toggleThing(ev): void {
-    const options = ev.target.options;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _toggleThing(event: any): void {
+    const options = event.target.options;
     const show = !options.show;
-    if (ev.target.optionsTarget) {
-      if (Array.isArray(ev.target.optionsTarget)) {
-        for (const options of ev.target.optionsTarget) {
+    if (event.target.optionsTarget) {
+      if (Array.isArray(event.target.optionsTarget)) {
+        for (const options of event.target.optionsTarget) {
           options.show = false;
         }
       } else {
-        for (const [key] of Object.entries(ev.target.optionsTarget)) {
-          ev.target.optionsTarget[key].show = false;
+        for (const [key] of Object.entries(event.target.optionsTarget)) {
+          event.target.optionsTarget[key].show = false;
         }
       }
     }
@@ -1055,11 +1079,12 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     this._toggle = !this._toggle;
   }
 
-  private _addEntity(ev): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _addEntity(event: any): void {
     if (!this._config || !this.hass) {
       return;
     }
-    const target = ev.target;
+    const target = event.target;
     let newObject;
     if (target.configAddObject) {
       newObject = target.configAddObject;
@@ -1072,11 +1097,12 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     fireEvent(this, 'config-changed', { config: this._config });
   }
 
-  private _moveEntity(ev): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _moveEntity(event: any): void {
     if (!this._config || !this.hass) {
       return;
     }
-    const target = ev.target;
+    const target = event.target;
     let newArray = target.configArray.slice();
     if (target.configDirection == 'up') newArray = arrayMove(newArray, target.index, target.index - 1);
     else if (target.configDirection == 'down') newArray = arrayMove(newArray, target.index, target.index + 1);
@@ -1084,11 +1110,12 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     fireEvent(this, 'config-changed', { config: this._config });
   }
 
-  private _removeEntity(ev): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _removeEntity(event: any): void {
     if (!this._config || !this.hass) {
       return;
     }
-    const target = ev.target;
+    const target = event.target;
     const entitiesArray: BarCardConfig[] = [];
     let index = 0;
     for (const config of this._configArray) {
@@ -1102,11 +1129,12 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     fireEvent(this, 'config-changed', { config: this._config });
   }
 
-  private _addSeverity(ev): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _addSeverity(event: any): void {
     if (!this._config || !this.hass) {
       return;
     }
-    const target = ev.target;
+    const target = event.target;
 
     let severityArray;
     if (target.index === null) {
@@ -1132,11 +1160,12 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     fireEvent(this, 'config-changed', { config: this._config });
   }
 
-  private _moveSeverity(ev): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _moveSeverity(event: any): void {
     if (!this._config || !this.hass) {
       return;
     }
-    const target = ev.target;
+    const target = event.target;
 
     let severityArray;
     if (target.index === null) {
@@ -1161,11 +1190,12 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     fireEvent(this, 'config-changed', { config: this._config });
   }
 
-  private _removeSeverity(ev): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _removeSeverity(event: any): void {
     if (!this._config || !this.hass) {
       return;
     }
-    const target = ev.target;
+    const target = event.target;
 
     let severityArray;
     if (target.index === null) {
@@ -1175,9 +1205,10 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     }
 
     const clonedArray = severityArray.slice();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newArray: any = [];
     let arrayIndex = 0;
-    for (const config of clonedArray) {
+    for (const { } of clonedArray) {
       if (target.severityIndex !== arrayIndex) {
         newArray.push(clonedArray[arrayIndex]);
       }
@@ -1200,8 +1231,9 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     fireEvent(this, 'config-changed', { config: this._config });
   }
 
-  private _updateSeverity(ev): void {
-    const target = ev.target;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _updateSeverity(event: any): void {
+    const target = event.target;
 
     let severityArray;
     if (target.index === null) {
@@ -1209,6 +1241,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     } else {
       severityArray = this._configArray[target.index].severity;
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newSeverityArray: any = [];
     for (const index in severityArray) {
       if (target.severityIndex == index) {
@@ -1233,11 +1266,12 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     fireEvent(this, 'config-changed', { config: this._config });
   }
 
-  private _valueChanged(ev): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _valueChanged(event: any): void {
     if (!this._config || !this.hass) {
       return;
     }
-    const target = ev.target;
+    const target = event.target;
     if (target.configObject[target.configAttribute] == target.value) {
       return;
     }
@@ -1325,8 +1359,10 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     `;
   }
 }
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 window.customCards = window.customCards || [];
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 window.customCards.push({
   type: 'bar-card',
