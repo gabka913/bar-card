@@ -1,18 +1,22 @@
-# bar-card
+# Bar Card
+
+This is a fork from [custom-cards/bar-card](https://github.com/custom-cards/bar-card) because it was no maintained
+
+---
 
 ## [Examples](#examples-1)
 
-![Default](https://github.com/custom-cards/bar-card/blob/master/images/default.gif?raw=true)
+![Default](https://github.com/mreysei/bar-card/blob/master/images/default.gif?raw=true)
 
-![Severity](https://github.com/custom-cards/bar-card/blob/master/images/severity.gif?raw=true)
+![Severity](https://github.com/mreysei/bar-card/blob/master/images/severity.gif?raw=true)
 
-![Entity Row](https://github.com/custom-cards/bar-card/blob/master/images/entity_row.gif?raw=true)
+![Entity Row](https://github.com/mreysei/bar-card/blob/master/images/entity_row.gif?raw=true)
 
-![Direction](https://github.com/custom-cards/bar-card/blob/master/images/direction.gif?raw=true)
+![Direction](https://github.com/mreysei/bar-card/blob/master/images/direction.gif?raw=true)
 
-![Old Layout](https://github.com/custom-cards/bar-card/blob/master/images/old_layout.gif?raw=true)
+![Old Layout](https://github.com/mreysei/bar-card/blob/master/images/old_layout.gif?raw=true)
 
-![Custom CSS](https://github.com/custom-cards/bar-card/blob/master/images/customcss.gif?raw=true)
+![Custom CSS](https://github.com/mreysei/bar-card/blob/master/images/customcss.gif?raw=true)
 
 ## Options
 
