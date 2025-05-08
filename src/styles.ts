@@ -192,6 +192,10 @@ export const styles = html`
       text-align: left;
       text-overflow: ellipsis;
     }
+    bar-card-name,
+    bar-card-value {
+      line-height: 1;      /* makes line-height = font-size */
+    }
     .name-outside {
       margin-left: 16px;
     }
