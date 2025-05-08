@@ -155,9 +155,11 @@ export class BarCard extends LitElement {
           else if (config.decimal) entityState = Number(entityState).toFixed(config.decimal);
         }
 
-        // Defined height and check for configured height.
-        let barHeight: string | number = 40;
-        if (config.height) barHeight = config.height;
+        // Figure out the bar’s pixel height.
+        //  – If the user set `height:` in the config we honour it.
+        //  – Otherwise two text lines + a bit of padding (≈ old 40 px default).
+        const defaultHeight = Math.round(getLineHeightPx() * 2);  // e.g. 22 px × 2 = 44 px
+        const barHeight: string | number = config.height ?? defaultHeight;
 
         // Set style variables based on direction.
         let alignItems = 'stretch';
