@@ -156,9 +156,7 @@ export class BarCard extends LitElement {
         }
 
         // Figure out the bar’s pixel height.
-        //  – If the user set `height:` in the config we honour it.
-        //  – Otherwise two text lines + a bit of padding (≈ old 40 px default).
-        const defaultHeight = Math.round(getLineHeightPx() * 2);  // e.g. 22 px × 2 = 44 px
+        const defaultHeight = Math.round(this._getLineHeightPx() * 2);
         const barHeight: string | number = config.height ?? defaultHeight;
 
         // Set style variables based on direction.
@@ -550,6 +548,27 @@ export class BarCard extends LitElement {
         return (100 * (numberValue - min)) / (max - min);
     }
   }
+
+  // Always returns a pixel value; never throws or NaNs
+  private _getLineHeightPx(): number {
+    try {
+      const s = getComputedStyle(document.body);
+
+      // 1. Pixel value most browsers provide
+      const px = parseFloat(s.lineHeight);
+      if (!isNaN(px) && isFinite(px)) return px;
+
+      // 2. Multiplier × font‑size
+      const font = parseFloat(s.fontSize) || 14;
+      const mult = parseFloat(s.getPropertyValue('--ha-line-height-normal'));
+      if (!isNaN(mult) && isFinite(mult)) return font * mult;
+    } catch { /* ignore and fall back */ }
+
+    // 3. Absolute fallback keeps the card visible
+    return 20;
+  }
+
+
 
   private _handleAction(event): void {
     if (this.hass && event.target.config && event.detail.action) {
