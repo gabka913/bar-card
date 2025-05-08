@@ -2,7 +2,7 @@ import { BarCardConfig } from './types';
 import { createEditorConfigArray, arrayMove, hasConfigOrEntitiesChanged } from './helpers';
 import { LovelaceCardEditor, HomeAssistant, fireEvent } from 'custom-card-helpers';
 import { LitElement, PropertyValues, CSSResult, css } from 'lit-element';
-import { customElement } from 'lit-element/decorators';
+import { customElement } from 'lit-element';
 import { TemplateResult, html } from 'lit-html';
 
 @customElement('bar-card-editor')

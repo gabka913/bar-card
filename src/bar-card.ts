@@ -5,9 +5,9 @@ import { actionHandler } from './action-handler-directive';
 import { localize } from './localize/localize';
 import { mergeDeep, hasConfigOrEntitiesChanged, createConfigArray, getMaxMinBasedOnType } from './helpers';
 import { styles } from './styles';
-import { LovelaceCardEditor, HomeAssistant, domainIcon, computeDomain, hasAction, handleAction, Config } from 'custom-card-helpers';
+import { LovelaceCardEditor, HomeAssistant, domainIcon, computeDomain, hasAction, handleAction} from 'custom-card-helpers';
 import { LitElement, PropertyValues } from 'lit-element';
-import { customElement } from 'lit-element/decorators';
+import { customElement } from 'lit-element';
 import { TemplateResult, html } from 'lit-html';
 
 interface Section {
@@ -549,7 +549,7 @@ export class BarCard extends LitElement {
     }
   }
 
-  private _handleAction(event: { target: { config: Config }, detail: { action: string } }): void {
+  private _handleAction(event): void {
     if (this.hass && event.target.config && event.detail.action) {
       handleAction(this, this.hass, event.target.config, event.detail.action);
     }
