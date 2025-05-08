@@ -1345,7 +1345,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
         padding: 16px 0;
       }
       .card-background {
-        background: var(--paper-card-background-color);
+        background: var(--ha-card-background);
         border-radius: var(--ha-card-border-radius);
         padding: 8px;
       }

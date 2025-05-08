@@ -53,7 +53,7 @@ export const styles = html`
       position: relative;
     }
     bar-card-iconbar {
-      color: var(--icon-color, var(--paper-item-icon-color));
+      color: var(--ha-icon-color);
       align-items: center;
       align-self: center;
       display: flex;
