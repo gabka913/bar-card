@@ -1,6 +1,6 @@
 {
   "name": "bar-card",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "description": "Lovelace bar-card, forked of 'custom_cards/bar-card'",
   "keywords": [
     "home-assistant",
@@ -22,7 +22,7 @@
     "rollup": "rollup -c"
   },
   "dependencies": {
-    "custom-card-helpers": "^1.9.0",
+    "custom-card-helpers": "^1.8.0",
     "home-assistant-js-websocket": "^9.4.0",
     "lit-element": "2.5.1",
     "lit-html":     "1.4.1",

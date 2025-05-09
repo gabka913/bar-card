@@ -1,11 +1,10 @@
 import './editor';
 
 import { BarCardConfig } from './types';
-import { actionHandler } from './action-handler-directive';
 import { localize } from './localize/localize';
 import { mergeDeep, hasConfigOrEntitiesChanged, createConfigArray, getMaxMinBasedOnType } from './helpers';
 import { styles } from './styles';
-import { LovelaceCardEditor, HomeAssistant, domainIcon, computeDomain, hasAction, handleAction} from 'custom-card-helpers';
+import { LovelaceCardEditor, HomeAssistant, domainIcon, computeDomain} from 'custom-card-helpers';
 import { LitElement, PropertyValues } from 'lit-element';
 import { customElement } from 'lit-element';
 import { TemplateResult, html } from 'lit-html';
@@ -71,6 +70,17 @@ export class BarCard extends LitElement {
     this._configArray = createConfigArray(this._config);
     this._rowAmount = this._configArray.length / this._config.columns;
   }
+
+  private _showMoreInfo(entityId: string) {
+    this.dispatchEvent(
+      new CustomEvent('hass-more-info', {
+        bubbles: true,
+        composed: true,
+        detail: { entityId },
+      }),
+    );
+  }
+
 
   protected render(): TemplateResult | void {
     if (!this._config || !this.hass) {
@@ -379,44 +389,49 @@ export class BarCard extends LitElement {
         currentRowArray.push(html`
           <bar-card-card
             style="flex-direction: ${flexDirection}; align-items: ${alignItems};"
-            @action=${this._handleAction}
-            .config=${config}
-            .actionHandler=${actionHandler(this, {
-          hasHold: hasAction(config.hold_action),
-          hasDoubleClick: hasAction(config.double_tap_action),
-        })}
           >
             ${iconOutside} ${indicatorOutside} ${nameOutside}
             <bar-card-background
-              style="margin: ${backgroundMargin}; height: ${barHeight}${typeof barHeight == 'number'
-            ? 'px'
-            : ''}; ${barWidth}"
+              style="margin: ${backgroundMargin}; height: ${barHeight}${typeof barHeight === 'number' ? 'px' : ''}; ${barWidth}"
+              @click=${() => this._showMoreInfo(config.entity)}
             >
               <bar-card-backgroundbar style="--bar-color: ${barColor};"></bar-card-backgroundbar>
-              ${config.animation.state == 'on'
-            ? html`
+              ${config.animation.state === 'on'
+                ? html`
                     <bar-card-animationbar
-                      style="animation: ${animation} ${config.animation
-                .speed}s infinite ease-out; --bar-percent: ${animationPercent}%; --bar-color: ${barColor}; --animation-direction: ${animationDirection};"
+                      style="animation: ${animation} ${config.animation.speed}s infinite ease-out;
+                             --bar-percent: ${animationPercent}%;
+                             --bar-color: ${barColor};
+                             --animation-direction: ${animationDirection};"
                       class="${animationClass}"
                     ></bar-card-animationbar>
                   `
-            : ''}
+                : ''}
               <bar-card-currentbar
-                style="--bar-color: ${barColor}; --bar-percent: ${barPercent}%; --bar-direction: ${barDirection}"
+                style="--bar-color: ${barColor};
+                       --bar-percent: ${barPercent}%;
+                       --bar-direction: ${barDirection}"
               ></bar-card-currentbar>
               ${config.target
-            ? html`
+                ? html`
                     <bar-card-targetbar
-                      style="--bar-color: ${barColor}; --bar-percent: ${targetStartPercent}%; --bar-target-percent: ${targetEndPercent}%; --bar-direction: ${barDirection};"
+                      style="--bar-color: ${barColor};
+                             --bar-percent: ${targetStartPercent}%;
+                             --bar-target-percent: ${targetEndPercent}%;
+                             --bar-direction: ${barDirection};"
                     ></bar-card-targetbar>
                     <bar-card-markerbar
-                      style="--bar-color: ${barColor}; --bar-target-percent: ${targetMarkerPercent}%; ${markerDirection}: calc(${targetMarkerPercent}% - 1px); ${markerStyle}}"
+                      style="--bar-color: ${barColor};
+                             --bar-target-percent: ${targetMarkerPercent}%;
+                             ${markerDirection}: calc(${targetMarkerPercent}% - 1px);
+                             ${markerStyle}"
                     ></bar-card-markerbar>
                   `
-            : ''}
+                : ''}
               <bar-card-contentbar
-                class="${config.direction == 'up' ? 'contentbar-direction-up' : 'contentbar-direction-right'}"
+                class="${config.direction === 'up'
+                  ? 'contentbar-direction-up'
+                  : 'contentbar-direction-right'}"
               >
                 ${iconInside} ${indicatorInside} ${nameInside} ${minMaxInside} ${valueInside}
               </bar-card-contentbar>
@@ -424,6 +439,7 @@ export class BarCard extends LitElement {
             ${minMaxOutside} ${valueOutside}
           </bar-card-card>
         `);
+
 
         // Set entity state inside array if changed.
         if (entityState !== this._stateArray[index]) {
@@ -566,22 +582,6 @@ export class BarCard extends LitElement {
 
     // 3. Absolute fallback keeps the card visible
     return 20;
-  }
-
-
-
-  private _handleAction(event: CustomEvent): void {
-    if (!this.hass || !event.detail?.action) return;
-
-    type ConfEl = HTMLElement & { config?: BarCardConfig };
-
-    const cfg =
-      (event.target as ConfEl).config ??
-      (event.currentTarget as ConfEl).config;
-
-    if (cfg) {
-      handleAction(this, this.hass, cfg as BarCardConfig, event.detail.action);
-    }
   }
 
 
