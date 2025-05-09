@@ -570,11 +570,20 @@ export class BarCard extends LitElement {
 
 
 
-  private _handleAction(event): void {
-    if (this.hass && event.target.config && event.detail.action) {
-      handleAction(this, this.hass, event.target.config, event.detail.action);
+  private _handleAction(event: CustomEvent): void {
+    if (!this.hass || !event.detail?.action) return;
+
+    type ConfEl = HTMLElement & { config?: BarCardConfig };
+
+    const cfg =
+      (event.target as ConfEl).config ??
+      (event.currentTarget as ConfEl).config;
+
+    if (cfg) {
+      handleAction(this, this.hass, cfg as BarCardConfig, event.detail.action);
     }
   }
+
 
   getCardSize(): number {
     if (this._config.height) {
