@@ -186,7 +186,11 @@ export const styles = html`
     .indicator-show {
       animation: bar-card-indicator-fade 2s forwards;
     }
-    @keyframes bar-card-indicator-fade {
+    @keyframes bar-card-indicator-fade-a {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    @keyframes bar-card-indicator-fade-b {
       0% { opacity: 1; }
       100% { opacity: 0; }
     }

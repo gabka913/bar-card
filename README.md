@@ -1,6 +1,6 @@
 # Bar Card
 
-This is a fork from [custom-cards/bar-card](https://github.com/custom-cards/bar-card) because it was no maintained
+This is a fork from [custom-cards/bar-card](https://github.com/custom-cards/bar-card) because it was not maintained.
 
 ---
 

@@ -32,6 +32,7 @@ export class BarCard extends LitElement {
   private _configArray: BarCardConfig[] = [];
   private _stateArray: string[] = [];
   private _animationState: string[] = [];
+  private _indicatorToggle: boolean[] = [];
   private _rowAmount = 1;
 
   protected shouldUpdate(changedProps: PropertyValues): boolean {
@@ -337,20 +338,21 @@ export class BarCard extends LitElement {
         // Set indicator html based on position.
         let indicatorOutside;
         let indicatorInside;
-        const indicatorClassFade = indicatorText ? 'indicator-show' : '';
+        const fadeName = this._indicatorToggle[index] ? 'bar-card-indicator-fade-a' : 'bar-card-indicator-fade-b';
+        const indicatorStyleFade = indicatorText ? `opacity:1; animation: ${fadeName} 2s forwards;` : '';
         switch (config.positions.indicator) {
           case 'outside':
             indicatorOutside = html`
               <bar-card-indicator
-                class="${config.direction == 'up' ? '' : 'indicator-direction-right'} ${indicatorClassFade}"
-                style="--bar-color: ${barColor};"
+                class="${config.direction == 'up' ? '' : 'indicator-direction-right'}"
+                style="--bar-color: ${barColor}; ${indicatorStyleFade}"
                 >${indicatorText}</bar-card-indicator
               >
             `;
             break
           case 'inside':
             indicatorInside = html`
-              <bar-card-indicator class="${indicatorClassFade}" style="--bar-color: ${barColor};">${indicatorText}</bar-card-indicator>
+              <bar-card-indicator style="--bar-color: ${barColor}; ${indicatorStyleFade}">${indicatorText}</bar-card-indicator>
             `;
             break
           case 'off':
@@ -445,6 +447,9 @@ export class BarCard extends LitElement {
         if (entityState !== this._stateArray[index]) {
           this._stateArray[index] = entityState;
         }
+
+        // toggle fade animation name for next time
+        this._indicatorToggle[index] = !this._indicatorToggle[index];
       }
 
       // Add all bars for this row to array.
