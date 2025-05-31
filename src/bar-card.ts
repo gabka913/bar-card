@@ -337,11 +337,12 @@ export class BarCard extends LitElement {
         // Set indicator html based on position.
         let indicatorOutside;
         let indicatorInside;
+        const indicatorClassFade = indicatorText ? 'indicator-show' : '';
         switch (config.positions.indicator) {
           case 'outside':
             indicatorOutside = html`
               <bar-card-indicator
-                class="${config.direction == 'up' ? '' : 'indicator-direction-right'}"
+                class="${config.direction == 'up' ? '' : 'indicator-direction-right'} ${indicatorClassFade}"
                 style="--bar-color: ${barColor};"
                 >${indicatorText}</bar-card-indicator
               >
@@ -349,7 +350,7 @@ export class BarCard extends LitElement {
             break
           case 'inside':
             indicatorInside = html`
-              <bar-card-indicator style="--bar-color: ${barColor};">${indicatorText}</bar-card-indicator>
+              <bar-card-indicator class="${indicatorClassFade}" style="--bar-color: ${barColor};">${indicatorText}</bar-card-indicator>
             `;
             break
           case 'off':
