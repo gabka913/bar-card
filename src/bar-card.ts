@@ -5,9 +5,8 @@ import { localize } from './localize/localize';
 import { mergeDeep, hasConfigOrEntitiesChanged, createConfigArray, getMaxMinBasedOnType } from './helpers';
 import { styles } from './styles';
 import { LovelaceCardEditor, HomeAssistant, domainIcon, computeDomain} from 'custom-card-helpers';
-import { LitElement, PropertyValues } from 'lit-element';
-import { customElement } from 'lit-element';
-import { TemplateResult, html } from 'lit-html';
+import { LitElement, PropertyValues, html, TemplateResult } from 'lit';
+import { customElement } from 'lit/decorators.js';
 
 interface Section {
   text: string
@@ -28,7 +27,7 @@ export class BarCard extends LitElement {
     return {};
   }
 
-  public hass: HomeAssistant | undefined;
+  private _hass?: HomeAssistant;
   private _config!: BarCardConfig;
   private _configArray: BarCardConfig[] = [];
   private _stateArray: string[] = [];
@@ -83,7 +82,7 @@ export class BarCard extends LitElement {
 
 
   protected render(): TemplateResult | void {
-    if (!this._config || !this.hass) {
+    if (!this._config || !this._hass) {
       return html``;
     }
 
@@ -126,7 +125,7 @@ export class BarCard extends LitElement {
       for (let x = 0; x < columnsArray[i]; x++) {
         const index = i * this._config.columns + x;
         const config = this._configArray[index];
-        const state = this.hass!.states[config.entity];
+        const state = this._hass!.states[config.entity];
         if (!state) {
           currentRowArray.push(html`
             <div class="warning" style="margin-bottom: 8px;">
@@ -152,8 +151,8 @@ export class BarCard extends LitElement {
         }
 
         // If limit_value is defined limit the displayed value to min and max.
-        const max = getMaxMinBasedOnType(this.hass, config.max);
-        const min = getMaxMinBasedOnType(this.hass, config.min);
+        const max = getMaxMinBasedOnType(this._hass, config.max);
+        const min = getMaxMinBasedOnType(this._hass, config.min);
         if (config.limit_value) {
           entityState = Math.min(entityState, max);
           entityState = Math.max(entityState, min);
@@ -165,7 +164,7 @@ export class BarCard extends LitElement {
           else if (config.decimal) entityState = Number(entityState).toFixed(config.decimal);
         }
 
-        // Figure out the bar’s pixel height.
+        // Figure out the bar's pixel height.
         const defaultHeight = Math.round(this._getLineHeightPx() * 2);
         const barHeight: string | number = config.height ?? defaultHeight;
 
@@ -593,5 +592,16 @@ export class BarCard extends LitElement {
     } else {
       return this._rowAmount + 1;
     }
+  }
+
+  public set hass(value: HomeAssistant | undefined) {
+    const oldVal = this._hass;
+    this._hass = value;
+    // Trigger reactive update for 'hass'
+    this.requestUpdate('hass', oldVal);
+  }
+
+  public get hass(): HomeAssistant | undefined {
+    return this._hass;
   }
 }

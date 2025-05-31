@@ -1,5 +1,5 @@
 import { fireEvent, ActionHandlerOptions } from 'custom-card-helpers'
-import { Directive, directive, Part, PartType } from 'lit-html/directive'
+import { Directive, directive, Part, PartType } from 'lit/directive.js'
 
 const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
 
