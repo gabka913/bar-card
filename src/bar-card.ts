@@ -4,9 +4,10 @@ import { BarCardConfig } from './types';
 import { localize } from './localize/localize';
 import { mergeDeep, hasConfigOrEntitiesChanged, createConfigArray, getMaxMinBasedOnType } from './helpers';
 import { styles } from './styles';
-import { LovelaceCardEditor, HomeAssistant, domainIcon, computeDomain} from 'custom-card-helpers';
+import { LovelaceCardEditor, HomeAssistant, domainIcon, computeDomain, handleAction } from 'custom-card-helpers';
 import { LitElement, PropertyValues, html, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { actionHandler } from './action-handler-directive';
 
 interface Section {
   text: string
@@ -79,6 +80,12 @@ export class BarCard extends LitElement {
         detail: { entityId },
       }),
     );
+  }
+
+  private _handleAction(ev: CustomEvent): void {
+    if (this._hass && this._config && ev.detail && ev.detail.action) {
+      handleAction(ev.target as HTMLElement, this._hass, this._config, ev.detail.action);
+    }
   }
 
 
@@ -395,7 +402,10 @@ export class BarCard extends LitElement {
             ${iconOutside} ${indicatorOutside} ${nameOutside}
             <bar-card-background
               style="margin: ${backgroundMargin}; height: ${barHeight}${typeof barHeight === 'number' ? 'px' : ''}; ${barWidth}"
-              @click=${() => this._showMoreInfo(config.entity)}
+              ${actionHandler(this, {
+                hasDoubleClick: config.double_tap_action !== undefined,
+              })}
+              @action=${this._handleAction}
             >
               <bar-card-backgroundbar style="--bar-color: ${barColor};"></bar-card-backgroundbar>
               ${config.animation.state === 'on'

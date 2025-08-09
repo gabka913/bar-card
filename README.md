@@ -111,6 +111,8 @@ See [example](#200-default-layout-requires-card-mod). (**requires** [card-mod](h
 
 Prefered method of installation is [Home Assistant Community Store](https://github.com/hacs/integration).
 
+When installing via HACS, make sure you select **Dashboard** as the installation type.
+
 It's **required** to load this card as `module`.
 
 ```yaml
