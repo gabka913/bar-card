@@ -83,8 +83,12 @@ export class BarCard extends LitElement {
   }
 
   private _handleAction(ev: CustomEvent): void {
-    if (this._hass && this._config && ev.detail && ev.detail.action) {
-      handleAction(ev.target as HTMLElement, this._hass, this._config, ev.detail.action);
+    if (this._hass && ev.detail && ev.detail.action) {
+      // Get the config for this specific bar from the target element's dataset
+      const configIndex = parseInt((ev.target as HTMLElement).dataset.configIndex || '0');
+      const config = this._configArray[configIndex] || this._config;
+      
+      handleAction(ev.target as HTMLElement, this._hass, config, ev.detail.action);
     }
   }
 
@@ -159,8 +163,20 @@ export class BarCard extends LitElement {
         }
 
         // If limit_value is defined limit the displayed value to min and max.
-        const max = getMaxMinBasedOnType(this._hass, config.max);
-        const min = getMaxMinBasedOnType(this._hass, config.min);
+        let max = getMaxMinBasedOnType(this._hass, config.max);
+        let min = getMaxMinBasedOnType(this._hass, config.min);
+        
+        // Ensure max > min relationship; provide fallbacks if needed
+        if (max <= min) {
+          // If both are 0 (invalid), use default range
+          if (max === 0 && min === 0) {
+            min = 0;
+            max = 100;
+          } else {
+            // Ensure max is always greater than min
+            max = min + Math.max(1, Math.abs(min) * 0.1);
+          }
+        }
         if (config.limit_value) {
           entityState = Math.min(entityState, max);
           entityState = Math.max(entityState, min);
@@ -402,6 +418,7 @@ export class BarCard extends LitElement {
             ${iconOutside} ${indicatorOutside} ${nameOutside}
             <bar-card-background
               style="margin: ${backgroundMargin}; height: ${barHeight}${typeof barHeight === 'number' ? 'px' : ''}; ${barWidth}"
+              data-config-index="${index}"
               ${actionHandler(this, {
                 hasDoubleClick: config.double_tap_action !== undefined,
               })}
@@ -568,6 +585,11 @@ export class BarCard extends LitElement {
 
     if (value == 'unavailable') return 0;
     if (isNaN(numberValue)) return 100;
+    
+    // Prevent division by zero when max equals min
+    if (max === min) {
+      return numberValue >= max ? 100 : 0;
+    }
 
     switch (config.direction) {
       case 'right-reverse':

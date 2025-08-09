@@ -43,12 +43,22 @@ export function getMaxMinBasedOnType(hass: HomeAssistant | undefined, value: num
   if (hass === undefined) {
     return 0;
   }
+  
+  // Handle string values that might be direct numbers
+  if (typeof value === 'string') {
+    const directNumber = parseFloat(value);
+    if (!isNaN(directNumber)) {
+      return directNumber;
+    }
+  }
+  
+  // Handle entity references
   if (hass.states[value]) {
-    const parsedValue = parseInt(hass.states[value].state);
+    const parsedValue = parseFloat(hass.states[value].state);
     if (isNaN(parsedValue)) {
       return 0;
     }
-    return parsedValue
+    return parsedValue;
   }
   return 0;
 }
