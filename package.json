@@ -19,7 +19,9 @@
     "build": "npm run lint && npm run rollup",
     "lint": "eslint **/*.ts",
     "lint:fix": "npm run lint -- --fix",
-    "rollup": "rollup -c"
+    "rollup": "rollup -c",
+    "tsc:watch": "tsc --watch",
+    "tsc:build": "tsc"
   },
   "dependencies": {
     "custom-card-helpers": "^1.8.0",

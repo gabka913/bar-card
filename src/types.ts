@@ -21,7 +21,16 @@ export interface BarCardConfig {
   max: number | string
   min: number | string
   name: string
-  positions: any
+  showPercentValue: boolean
+  positions: {
+    icon?: 'inside' | 'outside' | 'off'
+    indicator?: 'inside' | 'outside' | 'off'
+    name?: 'inside' | 'outside' | 'off'
+    min?: 'inside' | 'outside' | 'off'
+    max?: 'inside' | 'outside' | 'off'
+    minmax?: 'inside' | 'outside' | 'off' // deprecated, use min and max instead
+    value?: 'inside' | 'outside' | 'off'
+  }
   severity: any
   stack: string
   tap_action?: ActionConfig

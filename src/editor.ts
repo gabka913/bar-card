@@ -25,7 +25,15 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     max: '',
     min: '',
     name: '',
-    positions: undefined,
+    showPercentValue: false,
+    positions: {
+      icon: 'outside',
+      indicator: 'outside',
+      name: 'inside',
+      min: 'off',
+      max: 'off',
+      value: 'inside',
+    },
     severity: undefined,
     stack: '',
     target: undefined,
@@ -66,7 +74,14 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     }
     if (this._config.positions) {
       if (Object.entries(this._config.positions).length === 0) {
-        delete this._config.positions;
+        this._config.positions = {
+          icon: 'outside',
+          indicator: 'outside',
+          name: 'inside',
+          min: 'off',
+          max: 'off',
+          value: 'inside',
+        };
         fireEvent(this, 'config-changed', { config: this._config });
       }
     }
@@ -79,7 +94,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
       }
       if (entityConfig.positions) {
         if (Object.entries(entityConfig.positions).length === 0) {
-          delete entityConfig.positions;
+          entityConfig.positions = undefined;
         }
       }
     }
@@ -821,7 +836,8 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
       icon: 'outside',
       indicator: 'outside',
       name: 'inside',
-      minmax: 'off',
+      min: 'off',
+      max: 'off',
       value: 'inside',
     };
     let config;
@@ -834,7 +850,16 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     const positionElementsArray: TemplateResult[] = [];
     const objectKeys = Object.keys(defaultPositions);
     for (const position of objectKeys) {
-      if (config.positions[position]) {
+      // Handle backward compatibility: if minmax is set but min/max are not, use minmax for both
+      let currentValue = config.positions[position];
+      if (position === 'min' && !config.positions.min && config.positions.minmax) {
+        currentValue = config.positions.minmax;
+      }
+      if (position === 'max' && !config.positions.max && config.positions.minmax) {
+        currentValue = config.positions.minmax;
+      }
+      
+      if (currentValue) {
         positionElementsArray.push(html`
           <div class="value">
             <paper-dropdown-menu
@@ -847,7 +872,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
               <paper-listbox
                 slot="dropdown-content"
                 attr-for-selected="item-name"
-                .selected=${config.positions[position]}
+                .selected=${currentValue}
               >
                 <paper-item item-name="inside">inside</paper-item>
                 <paper-item item-name="outside">outside</paper-item>
@@ -1215,13 +1240,13 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     }
     if (target.index === null) {
       if (newArray.length === 0) {
-        delete this._config.severity;
+        this._config.severity = undefined;
       } else {
         this._config.severity = newArray;
       }
     } else {
       if (newArray.length === 0) {
-        delete this._configArray[target.index].severity;
+        this._configArray[target.index].severity = undefined;
       } else {
         this._configArray[target.index].severity = newArray;
       }
@@ -1248,7 +1273,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
         const newObject = { [target.severityAttribute]: target.value };
         const mergedObject = Object.assign(clonedObject, newObject);
         if (target.value == '') {
-          delete mergedObject[target.severityAttribute];
+          mergedObject[target.severityAttribute] = undefined;
         }
         newSeverityArray.push(mergedObject);
       } else {
@@ -1283,7 +1308,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     if (target.configAttribute && target.configObject && !target.configAdd) {
       if (target.value == '' || target.value === false) {
         if (target.ignoreNull == true) return;
-        delete target.configObject[target.configAttribute];
+        target.configObject[target.configAttribute] = undefined;
       } else {
         console.log(target.configObject);
         target.configObject[target.configAttribute] = target.value;

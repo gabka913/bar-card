@@ -71,8 +71,8 @@ class ActionHandler extends HTMLElement {
         return
       }
       this.held = false
-      let x
-      let y
+      let x: number
+      let y: number
       if ((ev as TouchEvent).touches) {
         x = (ev as TouchEvent).touches[0].pageX
         y = (ev as TouchEvent).touches[0].pageY

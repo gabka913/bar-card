@@ -65,6 +65,7 @@ export const styles = html`
     bar-card-currentbar,
     bar-card-backgroundbar,
     bar-card-contentbar,
+    bar-card-minmaxbar,
     bar-card-targetbar,
     bar-card-animationbar {
       position: absolute;
@@ -76,13 +77,27 @@ export const styles = html`
       align-items: center;
       color: var(--primary-text-color);
       display: flex;
-      justify-content: flex-start;
+      justify-content: space-between;
+    }
+
+    bar-card-minmaxbar {
+      height: 1.2em;
+      color: var(--primary-text-color);
+      display: flex;
+      justify-content: space-between;
     }
     .contentbar-direction-right {
       flex-direction: row;
     }
+    bar-card-contentbar.contentbar-direction-right {
+      width: var(--bar-percent);
+    }
+
     .contentbar-direction-up {
       flex-direction: column;
+    }
+    bar-card-contentbar.contentbar-direction-up {
+      height: var(--bar-percent);
     }
     bar-card-backgroundbar {
       background: var(--bar-color);
@@ -207,7 +222,15 @@ export const styles = html`
     bar-card-name,
     bar-card-value {
       line-height: 1;      /* makes line-height = font-size */
+      flex-shrink: 0;
     }
+    bar-card-value-percent {
+      display: block;
+      font-size: 12px;
+      opacity: 0.7;
+      text-align: center;
+    }
+
     .name-outside {
       margin-left: 16px;
     }
@@ -224,6 +247,10 @@ export const styles = html`
       font-size: 10px;
       margin: 2px;
       opacity: 0.5;
+      padding: 0px 2px;
+    }
+    bar-card-max {
+      margin-left: auto;
     }
     .min-direction-up {
       margin-top: auto;

@@ -56,11 +56,13 @@ export class BarCard extends LitElement {
         direction: 'right',
         max: 100,
         min: 0,
+        showPercentValue: false,
         positions: {
           icon: 'outside',
           indicator: 'outside',
           name: 'inside',
-          minmax: 'off',
+          min: 'off',
+          max: 'off',
           value: 'inside',
         },
       },
@@ -288,31 +290,41 @@ export class BarCard extends LitElement {
 
         // Set min and max html based on position.
         let minMaxOutside;
-        let minMaxInside;
-        switch (config.positions.minmax) {
-          case 'outside':
-            minMaxOutside = html`
-              <bar-card-min>${max}${unitOfMeasurement}</bar-card-min>
-              <bar-card-divider>/</bar-card-divider>
-              <bar-card-max>${max}${unitOfMeasurement}</bar-card-max>
-            `;
-            break
-          case 'inside':
-            minMaxInside = html`
-              <bar-card-min class="${config.direction == 'up' ? 'min-direction-up' : 'min-direction-right'}"
-                >${min}${unitOfMeasurement}</bar-card-min
-              >
-              <bar-card-divider>/</bar-card-divider>
-              <bar-card-max> ${max}${unitOfMeasurement}</bar-card-max>
-            `;
-            break
-          case 'off':
-            break;
+        let minInside;
+        let maxInside;
+        
+        // Handle backward compatibility: if minmax is set, use it for both min and max
+        const minPosition = config.positions.min || (config.positions.minmax ? config.positions.minmax : 'off');
+        const maxPosition = config.positions.max || (config.positions.minmax ? config.positions.minmax : 'off');
+        
+        // Handle outside positions
+        if (minPosition === 'outside' || maxPosition === 'outside') {
+          minMaxOutside = html`
+            ${minPosition === 'outside' ? html`<bar-card-min>${min}${unitOfMeasurement}</bar-card-min>` : ''}
+            ${minPosition === 'outside' && maxPosition === 'outside' ? html`<bar-card-divider>/</bar-card-divider>` : ''}
+            ${maxPosition === 'outside' ? html`<bar-card-max>${max}${unitOfMeasurement}</bar-card-max>` : ''}
+          `;
+        }
+        
+        // Handle inside positions
+        if (minPosition === 'inside') {
+          minInside = html`<bar-card-min>${min}${unitOfMeasurement}</bar-card-min>`;
+        }
+
+        if (maxPosition === 'inside') {
+          maxInside = html`<bar-card-max>${max}${unitOfMeasurement}</bar-card-max>`;
         }
 
         // Set value html based on position.
         let valueOutside;
         let valueInside;
+        let valuePercent = html``;
+       
+        if (config.showPercentValue === true) {
+          const valPercent = Math.round(entityState / max * 10000) / 100;
+          valuePercent = html`<bar-card-value-percent>${valPercent}%</bar-card-value-percent>`;
+        }
+       
         switch (config.positions.value) {
           case 'outside':
             valueOutside = html`
@@ -324,12 +336,12 @@ export class BarCard extends LitElement {
           case 'inside':
             valueInside = html`
               <bar-card-value
-                class="${config.positions.minmax == 'inside'
+                class="${(minPosition === 'inside' || maxPosition === 'inside')
                 ? ''
                 : config.direction == 'up'
                   ? 'value-direction-up'
                   : 'value-direction-right'}"
-                >${config.complementary ? max - entityState : entityState} ${unitOfMeasurement}</bar-card-value
+                >${config.complementary ? max - entityState : entityState} ${unitOfMeasurement}${valuePercent}</bar-card-value
               >
             `;
             break
@@ -457,12 +469,21 @@ export class BarCard extends LitElement {
                     ></bar-card-markerbar>
                   `
                 : ''}
-              <bar-card-contentbar
+              <bar-card-minmaxbar
                 class="${config.direction === 'up'
                   ? 'contentbar-direction-up'
                   : 'contentbar-direction-right'}"
               >
-                ${iconInside} ${indicatorInside} ${nameInside} ${minMaxInside} ${valueInside}
+                ${minInside} ${maxInside}
+              </bar-card-minmaxbar>
+              <bar-card-contentbar
+                style="--bar-percent: ${barPercent}%;"
+
+                class="${config.direction === 'up'
+                  ? 'contentbar-direction-up'
+                  : 'contentbar-direction-right'}"
+              >
+                ${iconInside} ${indicatorInside} ${nameInside} ${valueInside}
               </bar-card-contentbar>
             </bar-card-background>
             ${minMaxOutside} ${valueOutside}
