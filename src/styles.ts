@@ -113,6 +113,28 @@ export const styles = html`
         #0000 var(--bar-percent)
       );
     }
+    bar-card-currentbar.gradient-bar {
+      background: linear-gradient(
+        to var(--bar-direction),
+        var(--gradient-start-color) 0%,
+        var(--gradient-end-color) var(--bar-percent),
+        #0000 var(--bar-percent),
+        #0000 var(--bar-percent)
+      );
+      width: 100%;
+      height: 100%;
+    }
+    bar-card-currentbar.gradient-bar.vertical {
+      background: linear-gradient(
+        to var(--bar-direction),
+        var(--gradient-start-color) 0%,
+        var(--gradient-end-color) var(--bar-percent),
+        #0000 var(--bar-percent),
+        #0000 var(--bar-percent)
+      );
+      width: 100%;
+      height: 100%;
+    }
     bar-card-targetbar {
       background: linear-gradient(
         to var(--bar-direction),

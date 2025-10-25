@@ -22,6 +22,32 @@ I have added the option to display not only percentages, but also concrete value
 
 ![Custom CSS](https://github.com/mreysei/bar-card/blob/master/images/customcss.gif?raw=true)
 
+## Features
+
+### Gradient Colors
+- **Dynamic gradient bars** that show only the portion corresponding to the current value
+- **Configurable colors** with start, middle, and end color customization
+- **Automatic text contrast** - text color and shadow automatically adjust for optimal readability
+- **Smooth color transitions** using mathematical color interpolation
+
+### Enhanced Text Display
+- **Percentage values** can be displayed alongside actual values
+- **Intelligent text positioning** with automatic contrast adjustment
+- **Dynamic text shadows** based on background luminance
+- **Responsive text sizing** and positioning
+
+### Improved Positioning
+- **Separate min/max positioning** - control minimum and maximum value positions independently
+- **Enhanced entity row support** for seamless integration with entities cards
+- **Flexible width control** including auto-width functionality
+
+### Action Support
+- **Tap actions** for basic interactions
+- **Double-tap actions** for advanced interactions  
+- **Hold actions** for context menus and long-press functionality
+
+---
+
 ## Options
 
 | Name | Type | Default | Description
@@ -30,15 +56,19 @@ I have added the option to display not only percentages, but also concrete value
 | entity | string | **Required** | Entity State
 | animation | object | none | Defines animation options. See [Animation Options](#animation-options).
 | attribute | string | none | Displays a specific attribute instead of state value.
+| auto_width | boolean | false | Automatically adjusts bar width based on content.
 | color | string | var(--custom-bar-card-color, var(--primary-color)) | Color of the bar.
 | columns | number | none | Defines the amount of bars to be displayed on a single row when multiple entities are defined.
 | complementary | boolean | false | Displays complementary value (max - state_value) instead state value.
 | decimal | number | none | The amount of decimals to be displayed for the value.
 | direction | string | right | Direction of the bar. `right`, `up`
+| double_tap_action | object | none | See [home assistant documentation](https://www.home-assistant.io/lovelace/actions/).
 | entities | array | none | A list of entities. Accepts individual config options per defined entity.
 | entity_config | boolean | false | Sets the card to use the configured entity attributes as the card config.
 | entity_row | boolean | false | Removes the background card for use inside entities card.
+| gradient | object | none | Defines gradient colors for the bar. See [Gradient Options](#gradient-options).
 | height | string | 40px | Defines the height of the bar.
+| hold_action | object | none | See [home assistant documentation](https://www.home-assistant.io/lovelace/actions/).
 | icon | string | icon | Defines the icon to be displayed.
 | limit_value | boolean | false | Limits value displayed to `min` and `max` value.
 | max | number or string | 100 | Defines maximum value of the bar using a number or a entity.
@@ -46,11 +76,23 @@ I have added the option to display not only percentages, but also concrete value
 | name | string | none | Defines custom entity name.
 | positions | object | none | Defines the positions of the card elements. See [Positions Options](#positions-options).
 | severity | object | none | A list of severity values. See [Severity Options](#severity-options).
+| show_percent_value | boolean | false | Shows percentage value along with the actual value.
+| stack | string | none | Defines how bars are stacked. `horizontal`
 | tap_action | object | none | See [home assistant documentation](https://www.home-assistant.io/lovelace/actions/).
 | target | number | none | Defines and enables target marker value.
 | title | string | none | Adds title header to the card.
 | unit_of_measurement | string | attribute | Defines the unit of measurement to be displayed.
 | width | string | 100% | Defines the width of the bar.
+
+## Gradient Options
+
+| Name | Type | Default | Description
+| ---- | ---- | ------- | -----------
+| start_color | string | #00ff00 | Defines the starting color of the gradient (0% position).
+| middle_color | string | #ffff00 | Defines the middle color of the gradient (50% position).
+| end_color | string | #ff0000 | Defines the ending color of the gradient (100% position).
+
+**Note:** When using gradients, the bar will automatically show only the portion of the gradient corresponding to the current value. Text color and shadow are automatically adjusted for optimal readability based on the background gradient color.
 
 ## Severity Options
 
@@ -76,7 +118,9 @@ I have added the option to display not only percentages, but also concrete value
 | icon | string | outside | `inside`, `outside`, `off`
 | indicator | string | outside | `inside`, `outside`, `off`
 | name | string | inside | `inside`, `outside`, `off`
-| minmax | string | off | `inside`, `outside`, `off`
+| min | string | off | `inside`, `outside`, `off`
+| max | string | off | `inside`, `outside`, `off`
+| minmax | string | off | `inside`, `outside`, `off` (deprecated, use min and max instead)
 | value | string | inside | `inside`, `outside`, `off`
 
 ## Theme Variables
@@ -154,6 +198,92 @@ severity:
   - color: Green
     from: 51
     to: 100
+```
+
+### Gradient Colors
+
+```yaml
+entity: sensor.battery_level
+title: Battery Level with Gradient
+type: 'custom:bar-card'
+gradient:
+  start_color: '#00ff00'    # Green (good)
+  middle_color: '#ffaa00'   # Orange (medium) 
+  end_color: '#ff0000'      # Red (critical)
+```
+
+```yaml
+entity: sensor.temperature
+title: Temperature with Cool-Warm Gradient
+type: 'custom:bar-card'
+gradient:
+  start_color: '#0099ff'    # Blue (cold)
+  middle_color: '#ffffff'   # White (neutral)
+  end_color: '#ff4400'      # Red-Orange (hot)
+```
+
+```yaml
+entity: sensor.disk_usage
+title: Multiple Bars with Custom Gradients
+type: 'custom:bar-card'
+entities:
+  - entity: sensor.disk_usage_home
+    name: Home
+    gradient:
+      start_color: '#2196f3'
+      middle_color: '#9c27b0'
+      end_color: '#ff5722'
+  - entity: sensor.disk_usage_var
+    name: Var
+    gradient:
+      start_color: '#4caf50'
+      middle_color: '#ffc107'
+      end_color: '#f44336'
+```
+
+### Percentage Display
+
+```yaml
+entity: sensor.example
+title: Show Percentage Value
+type: 'custom:bar-card'
+show_percent_value: true
+```
+
+### Advanced Configuration Example
+
+```yaml
+entity: sensor.battery_level
+title: Advanced Bar Card Example
+type: 'custom:bar-card'
+height: 50px
+width: 80%
+show_percent_value: true
+decimal: 1
+gradient:
+  start_color: '#4caf50'    # Green
+  middle_color: '#ff9800'   # Orange
+  end_color: '#f44336'      # Red
+positions:
+  icon: outside
+  name: inside
+  value: inside
+  min: outside
+  max: outside
+tap_action:
+  action: more-info
+double_tap_action:
+  action: navigate
+  navigation_path: /lovelace/battery-details
+hold_action:
+  action: call-service
+  service: system_log.write
+  service_data:
+    message: "Battery level checked"
+target: 20
+animation:
+  state: on
+  speed: 3
 ```
 
 ### Entity Row

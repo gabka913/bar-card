@@ -25,7 +25,7 @@ export class BarCardEditor extends LitElement implements LovelaceCardEditor {
     max: '',
     min: '',
     name: '',
-    showPercentValue: false,
+    show_percent_value: false,
     positions: {
       icon: 'outside',
       indicator: 'outside',

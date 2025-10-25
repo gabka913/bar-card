@@ -66,7 +66,7 @@ export class BarCard extends LitElement {
         direction: 'right',
         max: 100,
         min: 0,
-        showPercentValue: false,
+        show_percent_value: false,
         positions: {
           icon: 'outside',
           indicator: 'outside',
@@ -330,7 +330,7 @@ export class BarCard extends LitElement {
         let valueInside;
         let valuePercent = html``;
        
-        if (config.showPercentValue === true) {
+        if (config.show_percent_value === true) {
           const valPercent = Math.round(entityState / max * 10000) / 100;
           valuePercent = html`<bar-card-value-percent>${valPercent}%</bar-card-value-percent>`;
         }
@@ -372,8 +372,10 @@ export class BarCard extends LitElement {
           indicatorText = '';
         }
 
-        // Set bar color.
-        const barColor = this._computeBarColor(entityState, index);
+        // Set bar color and determine if it should use gradient.
+        const barColorResult = this._computeBarColor(entityState, index);
+        const isGradient = barColorResult.startsWith('linear-gradient');
+        const barColor = isGradient ? '' : barColorResult;
 
         // Set indicator html based on position.
         let indicatorOutside;
@@ -385,14 +387,14 @@ export class BarCard extends LitElement {
             indicatorOutside = html`
               <bar-card-indicator
                 class="${config.direction == 'up' ? '' : 'indicator-direction-right'}"
-                style="--bar-color: ${barColor}; ${indicatorStyleFade}"
+                style="--bar-color: ${isGradient ? (config.gradient?.end_color || '#ff0000') : barColor}; ${indicatorStyleFade}"
                 >${indicatorText}</bar-card-indicator
               >
             `;
             break
           case 'inside':
             indicatorInside = html`
-              <bar-card-indicator style="--bar-color: ${barColor}; ${indicatorStyleFade}">${indicatorText}</bar-card-indicator>
+              <bar-card-indicator style="--bar-color: ${isGradient ? (config.gradient?.end_color || '#ff0000') : barColor}; ${indicatorStyleFade}">${indicatorText}</bar-card-indicator>
             `;
             break
           case 'off':
@@ -407,6 +409,50 @@ export class BarCard extends LitElement {
         if (targetEndPercent < targetStartPercent) {
           targetStartPercent = targetEndPercent;
           targetEndPercent = barPercent;
+        }
+
+        // Calculate gradient colors based on bar percentage for gradient bars
+        let gradientStartColor = '#00ff00'; // default green
+        let gradientEndColor = '#00ff00'; // default to green
+        let textColor = 'var(--primary-text-color)'; // default text color
+        let textShadow = 'none'; // default no shadow
+        
+        if (isGradient) {
+          // Get gradient colors from config or use defaults
+          const startColor = config.gradient?.start_color || '#00ff00';
+          const middleColor = config.gradient?.middle_color || '#ffff00';
+          const endColor = config.gradient?.end_color || '#ff0000';
+          
+          // Calculate the color at the current bar percentage
+          // Start (0%) -> Middle (50%) -> End (100%)
+          if (barPercent <= 50) {
+            // Between start and middle
+            const ratio = barPercent / 50;
+            gradientStartColor = startColor;
+            gradientEndColor = this._interpolateColor(startColor, middleColor, ratio);
+          } else {
+            // Between middle and end
+            const ratio = (barPercent - 50) / 50;
+            gradientStartColor = startColor;
+            gradientEndColor = this._interpolateColor(middleColor, endColor, ratio);
+          }
+
+          // Calculate text color based on the gradient color at text position
+          // Text is typically at the end of the filled bar, so use gradientEndColor
+          // But also consider a position around 85% of the bar for better accuracy
+          const textPosition = Math.min(85, barPercent); // Text position in percentage
+          let textBackgroundColor;
+          
+          if (textPosition <= 50) {
+            const ratio = textPosition / 50;
+            textBackgroundColor = this._interpolateColor(startColor, middleColor, ratio);
+          } else {
+            const ratio = (textPosition - 50) / 50;
+            textBackgroundColor = this._interpolateColor(middleColor, endColor, ratio);
+          }
+          
+          textColor = this._getContrastingTextColor(textBackgroundColor);
+          textShadow = this._getTextShadow(textBackgroundColor);
         }
 
         // Set bar width if configured.
@@ -441,33 +487,34 @@ export class BarCard extends LitElement {
               })}
               @action=${this._handleAction}
             >
-              <bar-card-backgroundbar style="--bar-color: ${barColor};"></bar-card-backgroundbar>
+              <bar-card-backgroundbar style="--bar-color: ${isGradient ? gradientEndColor : barColor};"></bar-card-backgroundbar>
               ${config.animation.state === 'on'
                 ? html`
                     <bar-card-animationbar
                       style="animation: ${animation} ${config.animation.speed}s infinite ease-out;
                              --bar-percent: ${animationPercent}%;
-                             --bar-color: ${barColor};
+                             --bar-color: ${isGradient ? (config.gradient?.start_color || '#00ff00') : barColor};
                              --animation-direction: ${animationDirection};"
                       class="${animationClass}"
                     ></bar-card-animationbar>
                   `
                 : ''}
               <bar-card-currentbar
-                style="--bar-color: ${barColor};
-                       --bar-percent: ${barPercent}%;
-                       --bar-direction: ${barDirection}"
+                class="${isGradient ? `gradient-bar ${config.direction === 'up' ? 'vertical' : ''}` : ''}"
+                style="${isGradient ? 
+                  `--gradient-start-color: ${gradientStartColor}; --gradient-end-color: ${gradientEndColor}; --bar-percent: ${barPercent}%; --bar-direction: ${barDirection}` : 
+                  `--bar-color: ${barColor}; --bar-percent: ${barPercent}%; --bar-direction: ${barDirection}`}"
               ></bar-card-currentbar>
               ${config.target
                 ? html`
                     <bar-card-targetbar
-                      style="--bar-color: ${barColor};
+                      style="--bar-color: ${isGradient ? (config.gradient?.end_color || '#ff0000') : barColor};
                              --bar-percent: ${targetStartPercent}%;
                              --bar-target-percent: ${targetEndPercent}%;
                              --bar-direction: ${barDirection};"
                     ></bar-card-targetbar>
                     <bar-card-markerbar
-                      style="--bar-color: ${barColor};
+                      style="--bar-color: ${isGradient ? (config.gradient?.end_color || '#ff0000') : barColor};
                              --bar-target-percent: ${targetMarkerPercent}%;
                              ${markerDirection}: calc(${targetMarkerPercent}% - 1px);
                              ${markerStyle}"
@@ -482,7 +529,7 @@ export class BarCard extends LitElement {
                 ${minInside} ${maxInside}
               </bar-card-minmaxbar>
               <bar-card-contentbar
-                style="--bar-percent: ${barPercent}%;"
+                style="--bar-percent: ${barPercent}%; ${isGradient ? `color: ${textColor}; text-shadow: ${textShadow};` : ''}"
 
                 class="${config.direction === 'up'
                   ? 'contentbar-direction-up'
@@ -530,7 +577,16 @@ export class BarCard extends LitElement {
     } else if (value == 'unavailable') {
       barColor = `var(--bar-card-disabled-color, ${config.color})`;
     } else {
-      barColor = config.color;
+      // Use gradient if no specific color is set, otherwise use the configured color
+      if (config.color && config.color !== 'var(--bar-card-color, var(--primary-color))') {
+        barColor = config.color;
+      } else {
+        // Get gradient colors from config or use defaults
+        const startColor = config.gradient?.start_color || '#00ff00';
+        const middleColor = config.gradient?.middle_color || '#ffff00';
+        const endColor = config.gradient?.end_color || '#ff0000';
+        barColor = `linear-gradient(to right, ${startColor} 0%, ${middleColor} 50%, ${endColor} 100%)`;
+      }
     }
     return barColor;
   }
@@ -625,6 +681,65 @@ export class BarCard extends LitElement {
         return 100 - (100 * (numberValue - min)) / (max - min);
       default:
         return (100 * (numberValue - min)) / (max - min);
+    }
+  }
+
+  private _interpolateColor(color1: string, color2: string, ratio: number): string {
+    // Extract RGB values from hex colors
+    const hex1 = color1.substring(1);
+    const hex2 = color2.substring(1);
+    
+    const r1 = parseInt(hex1.substring(0, 2), 16);
+    const g1 = parseInt(hex1.substring(2, 4), 16);
+    const b1 = parseInt(hex1.substring(4, 6), 16);
+    
+    const r2 = parseInt(hex2.substring(0, 2), 16);
+    const g2 = parseInt(hex2.substring(2, 4), 16);
+    const b2 = parseInt(hex2.substring(4, 6), 16);
+    
+    // Interpolate between the colors
+    const r = Math.round(r1 + (r2 - r1) * ratio);
+    const g = Math.round(g1 + (g2 - g1) * ratio);
+    const b = Math.round(b1 + (b2 - b1) * ratio);
+    
+    // Convert back to hex
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+  }
+
+  private _getLuminance(color: string): number {
+    // Extract RGB values from hex color
+    const hex = color.substring(1);
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+    
+    // Convert to linear RGB
+    const toLinear = (c: number) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    
+    // Calculate luminance
+    return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+  }
+
+  private _getContrastingTextColor(backgroundColor: string): string {
+    const luminance = this._getLuminance(backgroundColor);
+    // If background is dark (luminance < 0.5), use white text, otherwise use black
+    return luminance < 0.5 ? '#ffffff' : '#000000';
+  }
+
+  private _getTextShadow(backgroundColor: string): string {
+    const luminance = this._getLuminance(backgroundColor);
+    // Add shadow based on background brightness
+    if (luminance < 0.3) {
+      // Very dark background - light shadow
+      return '1px 1px 2px rgba(255, 255, 255, 0.3)';
+    } else if (luminance > 0.7) {
+      // Very light background - dark shadow
+      return '1px 1px 2px rgba(0, 0, 0, 0.5)';
+    } else {
+      // Medium background - stronger shadow for better contrast
+      return luminance < 0.5 ? 
+        '1px 1px 3px rgba(0, 0, 0, 0.8)' : 
+        '1px 1px 3px rgba(255, 255, 255, 0.8)';
     }
   }
 
