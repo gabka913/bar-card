@@ -51,6 +51,7 @@ export const styles = html`
       cursor: pointer;
       flex-grow: 1;
       position: relative;
+      transition: width 0.3s ease;
     }
     bar-card-iconbar {
       color: var(--ha-icon-color);
@@ -213,7 +214,7 @@ export const styles = html`
       align-items: center;
       align-self: center;
       justify-content: center;
-      margin: 4px;
+      margin: 4px 10px 4px 4px;
       overflow: hidden;
       position: relative;
       text-align: left;
@@ -224,11 +225,14 @@ export const styles = html`
       line-height: 1;      /* makes line-height = font-size */
       flex-shrink: 0;
     }
+    bar-card-value {
+      margin-left: auto;
+    }
     bar-card-value-percent {
       display: block;
       font-size: 12px;
       opacity: 0.7;
-      text-align: center;
+      text-align: right;
     }
 
     .name-outside {

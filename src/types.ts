@@ -39,4 +39,5 @@ export interface BarCardConfig {
   type: string
   unit_of_measurement: string
   width: string
+  auto_width?: boolean
 }

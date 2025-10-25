@@ -40,6 +40,16 @@ export class BarCard extends LitElement {
     return hasConfigOrEntitiesChanged(this, changedProps, false);
   }
 
+  protected firstUpdated(): void {
+    this._equalizeBarWidths();
+  }
+
+  protected updated(changedProps: PropertyValues): void {
+    if (changedProps.has('_config') || changedProps.has('_hass')) {
+      this._equalizeBarWidths();
+    }
+  }
+
   public setConfig(config: BarCardConfig): void {
     if (!config) {
       throw new Error(localize('common.invalid_configuration'));
@@ -196,7 +206,7 @@ export class BarCard extends LitElement {
 
         // Set style variables based on direction.
         let alignItems = 'stretch';
-        let backgroundMargin = '0px 0px 0px 13px';
+        let backgroundMarginLeft = '13px';
         let barDirection = 'right';
         let flexDirection = 'row';
         let markerDirection = 'left';
@@ -208,7 +218,7 @@ export class BarCard extends LitElement {
             markerDirection = 'left';
             break
           case 'up':
-            backgroundMargin = '0px';
+            backgroundMarginLeft = '0px';
             barDirection = 'top';
             flexDirection = 'column-reverse';
             markerDirection = 'bottom';
@@ -243,10 +253,10 @@ export class BarCard extends LitElement {
                 <ha-icon icon="${icon}"></ha-icon>
               </bar-card-iconbar>
             `;
-            backgroundMargin = '0px';
+            backgroundMarginLeft = '0px';
             break
           case 'off':
-            backgroundMargin = '0px';
+            backgroundMarginLeft = '0px';
             break
         }
 
@@ -265,7 +275,7 @@ export class BarCard extends LitElement {
                 >${name}</bar-card-name
               >
             `;
-            backgroundMargin = '0px';
+            backgroundMarginLeft = 'auto';
             break
           case 'inside':
             nameInside = html`
@@ -336,17 +346,12 @@ export class BarCard extends LitElement {
           case 'inside':
             valueInside = html`
               <bar-card-value
-                class="${(minPosition === 'inside' || maxPosition === 'inside')
-                ? ''
-                : config.direction == 'up'
+                class="${config.direction == 'up'
                   ? 'value-direction-up'
                   : 'value-direction-right'}"
                 >${config.complementary ? max - entityState : entityState} ${unitOfMeasurement}${valuePercent}</bar-card-value
               >
             `;
-            break
-          case 'off':
-            backgroundMargin = '0px';
             break
         }
 
@@ -429,7 +434,7 @@ export class BarCard extends LitElement {
           >
             ${iconOutside} ${indicatorOutside} ${nameOutside}
             <bar-card-background
-              style="margin: ${backgroundMargin}; height: ${barHeight}${typeof barHeight === 'number' ? 'px' : ''}; ${barWidth}"
+              style="margin-left: ${backgroundMarginLeft}; height: ${barHeight}${typeof barHeight === 'number' ? 'px' : ''}; ${barWidth}"
               data-config-index="${index}"
               ${actionHandler(this, {
                 hasDoubleClick: config.double_tap_action !== undefined,
@@ -662,5 +667,39 @@ export class BarCard extends LitElement {
 
   public get hass(): HomeAssistant | undefined {
     return this._hass;
+  }
+
+  /**
+   * Automatically equalize bar widths by setting all bars to the width of the narrowest bar
+   */
+  private _equalizeBarWidths(): void {
+    // Check if auto_width is enabled (default: true if not specified)
+    const autoWidthEnabled = this._config?.auto_width !== false;
+    if (!autoWidthEnabled) return;
+
+    // Wait for DOM to be updated
+    setTimeout(() => {
+      const bars = this.shadowRoot?.querySelectorAll('bar-card-background');
+      if (!bars || bars.length === 0) return;
+
+      let minWidth = Infinity;
+      const barWidths: number[] = [];
+
+      // Measure all bar widths
+      bars.forEach((bar) => {
+        const width = bar.getBoundingClientRect().width;
+        barWidths.push(width);
+        if (width < minWidth) {
+          minWidth = width;
+        }
+      });
+
+      // Apply the minimum width to all bars
+      bars.forEach((bar) => {
+        (bar as HTMLElement).style.width = `${minWidth}px`;
+        (bar as HTMLElement).style.flexGrow = '0';
+        (bar as HTMLElement).style.flexShrink = '0';
+      });
+    }, 100); // Small delay to ensure DOM is ready
   }
 }
