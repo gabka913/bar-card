@@ -1,10 +1,14 @@
 # Bar Card
 
-This is a fork from [custom-cards/bar-card](https://github.com/custom-cards/bar-card) because it was not maintained.
+This is a fork of [spacerokk/bar-card](https://github.com/spacerokk/bar-card).
+
+I have added the option to display not only percentages, but also concrete values and maximums for RAM and Disk usage, and I have made some additional UI improvements.
 
 ---
 
 ## [Examples](#examples-1)
+
+![MyFork](images/my_fork.png?raw=true)
 
 ![Default](https://github.com/mreysei/bar-card/blob/master/images/default.gif?raw=true)
 
