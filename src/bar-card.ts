@@ -1,5 +1,3 @@
-import './editor';
-
 import { BarCardConfig } from './types';
 import { localize } from './localize/localize';
 import { mergeDeep, hasConfigOrEntitiesChanged, createConfigArray, getMaxMinBasedOnType } from './helpers';
@@ -20,13 +18,129 @@ interface Section {
 
 @customElement('bar-card')
 export class BarCard extends LitElement {
-  public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    return document.createElement('bar-card-editor') as LovelaceCardEditor;
+  public static getStubConfig(): object {
+    return {
+      entity: 'sensor.example',
+      name: 'Example Bar Card',
+    };
   }
 
-  public static getStubConfig(): object {
-    return {};
-  }
+  // public static getConfigForm() {
+  //   return {
+  //     schema: [
+  //       {
+  //         name: 'entity',
+  //         selector: { entity: {} }
+  //       },
+  //       {
+  //         name: 'name',
+  //         selector: { text: {} }
+  //       },
+  //       {
+  //         name: 'color',
+  //         selector: { text: {} }
+  //       },
+  //       {
+  //         type: 'expandable',
+  //         expanded: false,
+  //         title: 'Default Positions',
+  //         name: 'default_positions',
+  //         flatten: true,
+  //         schema: [
+  //           {
+  //             type: 'grid',
+  //             name: 'positions',
+  //             schema: [
+  //               {
+  //                 name: 'icon',
+  //                 type: 'select',
+  //                 mode: 'dropdown',
+  //                 options: [
+  //                   ['inside', 'Inside'],
+  //                   ['outside', 'Outside'],
+  //                   ['off', 'Off']
+  //                 ]
+  //               },
+  //               {
+  //                 name: 'indicator',
+  //                 type: 'select',
+  //                 mode: 'dropdown',
+  //                 options: [
+  //                   ['inside', 'Inside'],
+  //                   ['outside', 'Outside'],
+  //                   ['off', 'Off']
+  //                 ]
+  //               },
+  //               {
+  //                 name: 'name',
+  //                 type: 'select',
+  //                 mode: 'dropdown',
+  //                 options: [
+  //                   ['inside', 'Inside'],
+  //                   ['outside', 'Outside'],
+  //                   ['off', 'Off']
+  //                 ]
+  //               },
+  //               {
+  //                 name: 'value',
+  //                 type: 'select',
+  //                 mode: 'dropdown',
+  //                 options: [
+  //                   ['inside', 'Inside'],
+  //                   ['outside', 'Outside'],
+  //                   ['off', 'Off']
+  //                 ]
+  //               },
+  //               {
+  //                 name: 'min',
+  //                 type: 'select',
+  //                 mode: 'dropdown',
+  //                 options: [
+  //                   ['inside', 'Inside'],
+  //                   ['outside', 'Outside'],
+  //                   ['off', 'Off']
+  //                 ]
+  //               },
+  //               {
+  //                 name: 'max',
+  //                 type: 'select',
+  //                 mode: 'dropdown',
+  //                 options: [
+  //                   ['inside', 'Inside'],
+  //                   ['outside', 'Outside'],
+  //                   ['off', 'Off']
+  //                 ]
+  //               }
+  //             ]
+  //           }
+  //         ]
+  //       }
+  //     ],
+  //     computeLabel: (schema: { name: string }) => {
+  //       switch (schema.name) {
+  //         case 'entity':
+  //           return 'Entity';
+  //         case 'name':
+  //           return 'Name';
+  //         case 'color':
+  //           return 'Color';
+  //         case 'positions.icon':
+  //           return 'Icon Position';
+  //         case 'positions.indicator':
+  //           return 'Indicator Position';
+  //         case 'positions.name':
+  //           return 'Name Position';
+  //         case 'positions.min':
+  //           return 'Min Position';
+  //         case 'positions.max':
+  //           return 'Max Position';
+  //         case 'positions.value':
+  //           return 'Value Position';
+  //       }
+  //       return undefined;
+  //     }
+  //   };
+  // }
 
   private _hass?: HomeAssistant;
   private _config!: BarCardConfig;
@@ -818,3 +932,25 @@ export class BarCard extends LitElement {
     }, 100); // Small delay to ensure DOM is ready
   }
 }
+
+// Register the card with Home Assistant
+declare global {
+  interface Window {
+    customCards: Array<{
+      type: string;
+      name: string;
+      preview?: boolean;
+      description?: string;
+      documentationURL?: string;
+    }>;
+  }
+}
+
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: 'custom:bar-card',
+  name: 'Bar Card',
+  preview: false,
+  description: 'A customizable progress bar card for Home Assistant',
+  documentationURL: 'https://github.com/custom-cards/bar-card'
+});
