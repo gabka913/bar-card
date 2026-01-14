@@ -14,11 +14,6 @@ export interface BarCardConfig {
   entities: any
   entity_row: boolean
   entity: string
-  gradient?: {
-    start_color?: string
-    middle_color?: string
-    end_color?: string
-  }
   height: string | number
   hold_action?: ActionConfig
   icon: any
@@ -26,7 +21,6 @@ export interface BarCardConfig {
   max: number | string
   min: number | string
   name: string
-  show_percent_value: boolean
   positions: {
     icon?: 'inside' | 'outside' | 'off'
     indicator?: 'inside' | 'outside' | 'off'
@@ -44,5 +38,4 @@ export interface BarCardConfig {
   type: string
   unit_of_measurement: string
   width: string
-  auto_width?: boolean
 }

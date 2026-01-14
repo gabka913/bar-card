@@ -1,3 +1,5 @@
+import './editor';
+
 import { BarCardConfig } from './types';
 import { localize } from './localize/localize';
 import { mergeDeep, hasConfigOrEntitiesChanged, createConfigArray, getMaxMinBasedOnType } from './helpers';
@@ -18,129 +20,13 @@ interface Section {
 
 @customElement('bar-card')
 export class BarCard extends LitElement {
-  public static getStubConfig(): object {
-    return {
-      entity: 'sensor.example',
-      name: 'Example Bar Card',
-    };
+  public static async getConfigElement(): Promise<LovelaceCardEditor> {
+    return document.createElement('bar-card-editor') as LovelaceCardEditor;
   }
 
-  // public static getConfigForm() {
-  //   return {
-  //     schema: [
-  //       {
-  //         name: 'entity',
-  //         selector: { entity: {} }
-  //       },
-  //       {
-  //         name: 'name',
-  //         selector: { text: {} }
-  //       },
-  //       {
-  //         name: 'color',
-  //         selector: { text: {} }
-  //       },
-  //       {
-  //         type: 'expandable',
-  //         expanded: false,
-  //         title: 'Default Positions',
-  //         name: 'default_positions',
-  //         flatten: true,
-  //         schema: [
-  //           {
-  //             type: 'grid',
-  //             name: 'positions',
-  //             schema: [
-  //               {
-  //                 name: 'icon',
-  //                 type: 'select',
-  //                 mode: 'dropdown',
-  //                 options: [
-  //                   ['inside', 'Inside'],
-  //                   ['outside', 'Outside'],
-  //                   ['off', 'Off']
-  //                 ]
-  //               },
-  //               {
-  //                 name: 'indicator',
-  //                 type: 'select',
-  //                 mode: 'dropdown',
-  //                 options: [
-  //                   ['inside', 'Inside'],
-  //                   ['outside', 'Outside'],
-  //                   ['off', 'Off']
-  //                 ]
-  //               },
-  //               {
-  //                 name: 'name',
-  //                 type: 'select',
-  //                 mode: 'dropdown',
-  //                 options: [
-  //                   ['inside', 'Inside'],
-  //                   ['outside', 'Outside'],
-  //                   ['off', 'Off']
-  //                 ]
-  //               },
-  //               {
-  //                 name: 'value',
-  //                 type: 'select',
-  //                 mode: 'dropdown',
-  //                 options: [
-  //                   ['inside', 'Inside'],
-  //                   ['outside', 'Outside'],
-  //                   ['off', 'Off']
-  //                 ]
-  //               },
-  //               {
-  //                 name: 'min',
-  //                 type: 'select',
-  //                 mode: 'dropdown',
-  //                 options: [
-  //                   ['inside', 'Inside'],
-  //                   ['outside', 'Outside'],
-  //                   ['off', 'Off']
-  //                 ]
-  //               },
-  //               {
-  //                 name: 'max',
-  //                 type: 'select',
-  //                 mode: 'dropdown',
-  //                 options: [
-  //                   ['inside', 'Inside'],
-  //                   ['outside', 'Outside'],
-  //                   ['off', 'Off']
-  //                 ]
-  //               }
-  //             ]
-  //           }
-  //         ]
-  //       }
-  //     ],
-  //     computeLabel: (schema: { name: string }) => {
-  //       switch (schema.name) {
-  //         case 'entity':
-  //           return 'Entity';
-  //         case 'name':
-  //           return 'Name';
-  //         case 'color':
-  //           return 'Color';
-  //         case 'positions.icon':
-  //           return 'Icon Position';
-  //         case 'positions.indicator':
-  //           return 'Indicator Position';
-  //         case 'positions.name':
-  //           return 'Name Position';
-  //         case 'positions.min':
-  //           return 'Min Position';
-  //         case 'positions.max':
-  //           return 'Max Position';
-  //         case 'positions.value':
-  //           return 'Value Position';
-  //       }
-  //       return undefined;
-  //     }
-  //   };
-  // }
+  public static getStubConfig(): object {
+    return {};
+  }
 
   private _hass?: HomeAssistant;
   private _config!: BarCardConfig;
@@ -152,16 +38,6 @@ export class BarCard extends LitElement {
 
   protected shouldUpdate(changedProps: PropertyValues): boolean {
     return hasConfigOrEntitiesChanged(this, changedProps, false);
-  }
-
-  protected firstUpdated(): void {
-    this._equalizeBarWidths();
-  }
-
-  protected updated(changedProps: PropertyValues): void {
-    if (changedProps.has('_config') || changedProps.has('_hass')) {
-      this._equalizeBarWidths();
-    }
   }
 
   public setConfig(config: BarCardConfig): void {
@@ -180,7 +56,6 @@ export class BarCard extends LitElement {
         direction: 'right',
         max: 100,
         min: 0,
-        show_percent_value: false,
         positions: {
           icon: 'outside',
           indicator: 'outside',
@@ -320,7 +195,7 @@ export class BarCard extends LitElement {
 
         // Set style variables based on direction.
         let alignItems = 'stretch';
-        let backgroundMarginLeft = '13px';
+        let backgroundMargin = '0px 0px 0px 13px';
         let barDirection = 'right';
         let flexDirection = 'row';
         let markerDirection = 'left';
@@ -332,7 +207,7 @@ export class BarCard extends LitElement {
             markerDirection = 'left';
             break
           case 'up':
-            backgroundMarginLeft = '0px';
+            backgroundMargin = '0px';
             barDirection = 'top';
             flexDirection = 'column-reverse';
             markerDirection = 'bottom';
@@ -367,10 +242,10 @@ export class BarCard extends LitElement {
                 <ha-icon icon="${icon}"></ha-icon>
               </bar-card-iconbar>
             `;
-            backgroundMarginLeft = '0px';
+            backgroundMargin = '0px';
             break
           case 'off':
-            backgroundMarginLeft = '0px';
+            backgroundMargin = '0px';
             break
         }
 
@@ -389,7 +264,7 @@ export class BarCard extends LitElement {
                 >${name}</bar-card-name
               >
             `;
-            backgroundMarginLeft = 'auto';
+            backgroundMargin = '0px';
             break
           case 'inside':
             nameInside = html`
@@ -414,8 +289,7 @@ export class BarCard extends LitElement {
 
         // Set min and max html based on position.
         let minMaxOutside;
-        let minInside;
-        let maxInside;
+        let minMaxInside;
         
         // Handle backward compatibility: if minmax is set, use it for both min and max
         const minPosition = config.positions.min || (config.positions.minmax ? config.positions.minmax : 'off');
@@ -431,24 +305,21 @@ export class BarCard extends LitElement {
         }
         
         // Handle inside positions
-        if (minPosition === 'inside') {
-          minInside = html`<bar-card-min>${min}${unitOfMeasurement}</bar-card-min>`;
-        }
-
-        if (maxPosition === 'inside') {
-          maxInside = html`<bar-card-max>${max}${unitOfMeasurement}</bar-card-max>`;
+        if (minPosition === 'inside' || maxPosition === 'inside') {
+          minMaxInside = html`
+            ${minPosition === 'inside' ? html`
+              <bar-card-min class="${config.direction == 'up' ? 'min-direction-up' : 'min-direction-right'}"
+                >${min}${unitOfMeasurement}</bar-card-min
+              >
+            ` : ''}
+            ${minPosition === 'inside' && maxPosition === 'inside' ? html`<bar-card-divider>/</bar-card-divider>` : ''}
+            ${maxPosition === 'inside' ? html`<bar-card-max> ${max}${unitOfMeasurement}</bar-card-max>` : ''}
+          `;
         }
 
         // Set value html based on position.
         let valueOutside;
         let valueInside;
-        let valuePercent = html``;
-       
-        if (config.show_percent_value === true) {
-          const valPercent = Math.round(entityState / max * 10000) / 100;
-          valuePercent = html`<bar-card-value-percent>${valPercent}%</bar-card-value-percent>`;
-        }
-       
         switch (config.positions.value) {
           case 'outside':
             valueOutside = html`
@@ -460,12 +331,17 @@ export class BarCard extends LitElement {
           case 'inside':
             valueInside = html`
               <bar-card-value
-                class="${config.direction == 'up'
+                class="${(minPosition === 'inside' || maxPosition === 'inside')
+                ? ''
+                : config.direction == 'up'
                   ? 'value-direction-up'
                   : 'value-direction-right'}"
-                >${config.complementary ? max - entityState : entityState} ${unitOfMeasurement}${valuePercent}</bar-card-value
+                >${config.complementary ? max - entityState : entityState} ${unitOfMeasurement}</bar-card-value
               >
             `;
+            break
+          case 'off':
+            backgroundMargin = '0px';
             break
         }
 
@@ -486,10 +362,8 @@ export class BarCard extends LitElement {
           indicatorText = '';
         }
 
-        // Set bar color and determine if it should use gradient.
-        const barColorResult = this._computeBarColor(entityState, index);
-        const isGradient = barColorResult.startsWith('linear-gradient');
-        const barColor = isGradient ? '' : barColorResult;
+        // Set bar color.
+        const barColor = this._computeBarColor(entityState, index);
 
         // Set indicator html based on position.
         let indicatorOutside;
@@ -501,14 +375,14 @@ export class BarCard extends LitElement {
             indicatorOutside = html`
               <bar-card-indicator
                 class="${config.direction == 'up' ? '' : 'indicator-direction-right'}"
-                style="--bar-color: ${isGradient ? (config.gradient?.end_color || '#ff0000') : barColor}; ${indicatorStyleFade}"
+                style="--bar-color: ${barColor}; ${indicatorStyleFade}"
                 >${indicatorText}</bar-card-indicator
               >
             `;
             break
           case 'inside':
             indicatorInside = html`
-              <bar-card-indicator style="--bar-color: ${isGradient ? (config.gradient?.end_color || '#ff0000') : barColor}; ${indicatorStyleFade}">${indicatorText}</bar-card-indicator>
+              <bar-card-indicator style="--bar-color: ${barColor}; ${indicatorStyleFade}">${indicatorText}</bar-card-indicator>
             `;
             break
           case 'off':
@@ -523,50 +397,6 @@ export class BarCard extends LitElement {
         if (targetEndPercent < targetStartPercent) {
           targetStartPercent = targetEndPercent;
           targetEndPercent = barPercent;
-        }
-
-        // Calculate gradient colors based on bar percentage for gradient bars
-        let gradientStartColor = '#00ff00'; // default green
-        let gradientEndColor = '#00ff00'; // default to green
-        let textColor = 'var(--primary-text-color)'; // default text color
-        let textShadow = 'none'; // default no shadow
-        
-        if (isGradient) {
-          // Get gradient colors from config or use defaults
-          const startColor = config.gradient?.start_color || '#00ff00';
-          const middleColor = config.gradient?.middle_color || '#ffff00';
-          const endColor = config.gradient?.end_color || '#ff0000';
-          
-          // Calculate the color at the current bar percentage
-          // Start (0%) -> Middle (50%) -> End (100%)
-          if (barPercent <= 50) {
-            // Between start and middle
-            const ratio = barPercent / 50;
-            gradientStartColor = startColor;
-            gradientEndColor = this._interpolateColor(startColor, middleColor, ratio);
-          } else {
-            // Between middle and end
-            const ratio = (barPercent - 50) / 50;
-            gradientStartColor = startColor;
-            gradientEndColor = this._interpolateColor(middleColor, endColor, ratio);
-          }
-
-          // Calculate text color based on the gradient color at text position
-          // Text is typically at the end of the filled bar, so use gradientEndColor
-          // But also consider a position around 85% of the bar for better accuracy
-          const textPosition = Math.min(85, barPercent); // Text position in percentage
-          let textBackgroundColor;
-          
-          if (textPosition <= 50) {
-            const ratio = textPosition / 50;
-            textBackgroundColor = this._interpolateColor(startColor, middleColor, ratio);
-          } else {
-            const ratio = (textPosition - 50) / 50;
-            textBackgroundColor = this._interpolateColor(middleColor, endColor, ratio);
-          }
-          
-          textColor = this._getContrastingTextColor(textBackgroundColor);
-          textShadow = this._getTextShadow(textBackgroundColor);
         }
 
         // Set bar width if configured.
@@ -594,62 +424,52 @@ export class BarCard extends LitElement {
           >
             ${iconOutside} ${indicatorOutside} ${nameOutside}
             <bar-card-background
-              style="margin-left: ${backgroundMarginLeft}; height: ${barHeight}${typeof barHeight === 'number' ? 'px' : ''}; ${barWidth}"
+              style="margin: ${backgroundMargin}; height: ${barHeight}${typeof barHeight === 'number' ? 'px' : ''}; ${barWidth}"
               data-config-index="${index}"
               ${actionHandler(this, {
                 hasDoubleClick: config.double_tap_action !== undefined,
               })}
               @action=${this._handleAction}
             >
-              <bar-card-backgroundbar style="--bar-color: ${isGradient ? gradientEndColor : barColor};"></bar-card-backgroundbar>
+              <bar-card-backgroundbar style="--bar-color: ${barColor};"></bar-card-backgroundbar>
               ${config.animation.state === 'on'
                 ? html`
                     <bar-card-animationbar
                       style="animation: ${animation} ${config.animation.speed}s infinite ease-out;
                              --bar-percent: ${animationPercent}%;
-                             --bar-color: ${isGradient ? (config.gradient?.start_color || '#00ff00') : barColor};
+                             --bar-color: ${barColor};
                              --animation-direction: ${animationDirection};"
                       class="${animationClass}"
                     ></bar-card-animationbar>
                   `
                 : ''}
               <bar-card-currentbar
-                class="${isGradient ? `gradient-bar ${config.direction === 'up' ? 'vertical' : ''}` : ''}"
-                style="${isGradient ? 
-                  `--gradient-start-color: ${gradientStartColor}; --gradient-end-color: ${gradientEndColor}; --bar-percent: ${barPercent}%; --bar-direction: ${barDirection}` : 
-                  `--bar-color: ${barColor}; --bar-percent: ${barPercent}%; --bar-direction: ${barDirection}`}"
+                style="--bar-color: ${barColor};
+                       --bar-percent: ${barPercent}%;
+                       --bar-direction: ${barDirection}"
               ></bar-card-currentbar>
               ${config.target
                 ? html`
                     <bar-card-targetbar
-                      style="--bar-color: ${isGradient ? (config.gradient?.end_color || '#ff0000') : barColor};
+                      style="--bar-color: ${barColor};
                              --bar-percent: ${targetStartPercent}%;
                              --bar-target-percent: ${targetEndPercent}%;
                              --bar-direction: ${barDirection};"
                     ></bar-card-targetbar>
                     <bar-card-markerbar
-                      style="--bar-color: ${isGradient ? (config.gradient?.end_color || '#ff0000') : barColor};
+                      style="--bar-color: ${barColor};
                              --bar-target-percent: ${targetMarkerPercent}%;
                              ${markerDirection}: calc(${targetMarkerPercent}% - 1px);
                              ${markerStyle}"
                     ></bar-card-markerbar>
                   `
                 : ''}
-              <bar-card-minmaxbar
-                class="${config.direction === 'up'
-                  ? 'contentbar-direction-up'
-                  : 'contentbar-direction-right'}"
-              >
-                ${minInside} ${maxInside}
-              </bar-card-minmaxbar>
               <bar-card-contentbar
-                style="--bar-percent: ${barPercent}%; ${isGradient ? `color: ${textColor}; text-shadow: ${textShadow};` : ''}"
-
                 class="${config.direction === 'up'
                   ? 'contentbar-direction-up'
                   : 'contentbar-direction-right'}"
               >
-                ${iconInside} ${indicatorInside} ${nameInside} ${valueInside}
+                ${iconInside} ${indicatorInside} ${nameInside} ${minMaxInside} ${valueInside}
               </bar-card-contentbar>
             </bar-card-background>
             ${minMaxOutside} ${valueOutside}
@@ -691,16 +511,7 @@ export class BarCard extends LitElement {
     } else if (value == 'unavailable') {
       barColor = `var(--bar-card-disabled-color, ${config.color})`;
     } else {
-      // Use gradient if no specific color is set, otherwise use the configured color
-      if (config.color && config.color !== 'var(--bar-card-color, var(--primary-color))') {
-        barColor = config.color;
-      } else {
-        // Get gradient colors from config or use defaults
-        const startColor = config.gradient?.start_color || '#00ff00';
-        const middleColor = config.gradient?.middle_color || '#ffff00';
-        const endColor = config.gradient?.end_color || '#ff0000';
-        barColor = `linear-gradient(to right, ${startColor} 0%, ${middleColor} 50%, ${endColor} 100%)`;
-      }
+      barColor = config.color;
     }
     return barColor;
   }
@@ -798,65 +609,6 @@ export class BarCard extends LitElement {
     }
   }
 
-  private _interpolateColor(color1: string, color2: string, ratio: number): string {
-    // Extract RGB values from hex colors
-    const hex1 = color1.substring(1);
-    const hex2 = color2.substring(1);
-    
-    const r1 = parseInt(hex1.substring(0, 2), 16);
-    const g1 = parseInt(hex1.substring(2, 4), 16);
-    const b1 = parseInt(hex1.substring(4, 6), 16);
-    
-    const r2 = parseInt(hex2.substring(0, 2), 16);
-    const g2 = parseInt(hex2.substring(2, 4), 16);
-    const b2 = parseInt(hex2.substring(4, 6), 16);
-    
-    // Interpolate between the colors
-    const r = Math.round(r1 + (r2 - r1) * ratio);
-    const g = Math.round(g1 + (g2 - g1) * ratio);
-    const b = Math.round(b1 + (b2 - b1) * ratio);
-    
-    // Convert back to hex
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-  }
-
-  private _getLuminance(color: string): number {
-    // Extract RGB values from hex color
-    const hex = color.substring(1);
-    const r = parseInt(hex.substring(0, 2), 16) / 255;
-    const g = parseInt(hex.substring(2, 4), 16) / 255;
-    const b = parseInt(hex.substring(4, 6), 16) / 255;
-    
-    // Convert to linear RGB
-    const toLinear = (c: number) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-    
-    // Calculate luminance
-    return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
-  }
-
-  private _getContrastingTextColor(backgroundColor: string): string {
-    const luminance = this._getLuminance(backgroundColor);
-    // If background is dark (luminance < 0.5), use white text, otherwise use black
-    return luminance < 0.5 ? '#ffffff' : '#000000';
-  }
-
-  private _getTextShadow(backgroundColor: string): string {
-    const luminance = this._getLuminance(backgroundColor);
-    // Add shadow based on background brightness
-    if (luminance < 0.3) {
-      // Very dark background - light shadow
-      return '1px 1px 2px rgba(255, 255, 255, 0.3)';
-    } else if (luminance > 0.7) {
-      // Very light background - dark shadow
-      return '1px 1px 2px rgba(0, 0, 0, 0.5)';
-    } else {
-      // Medium background - stronger shadow for better contrast
-      return luminance < 0.5 ? 
-        '1px 1px 3px rgba(0, 0, 0, 0.8)' : 
-        '1px 1px 3px rgba(255, 255, 255, 0.8)';
-    }
-  }
-
   // Always returns a pixel value; never throws or NaNs
   private _getLineHeightPx(): number {
     try {
@@ -897,60 +649,4 @@ export class BarCard extends LitElement {
   public get hass(): HomeAssistant | undefined {
     return this._hass;
   }
-
-  /**
-   * Automatically equalize bar widths by setting all bars to the width of the narrowest bar
-   */
-  private _equalizeBarWidths(): void {
-    // Check if auto_width is enabled (default: true if not specified)
-    const autoWidthEnabled = this._config?.auto_width !== false;
-    if (!autoWidthEnabled) return;
-
-    // Wait for DOM to be updated
-    setTimeout(() => {
-      const bars = this.shadowRoot?.querySelectorAll('bar-card-background');
-      if (!bars || bars.length === 0) return;
-
-      let minWidth = Infinity;
-      const barWidths: number[] = [];
-
-      // Measure all bar widths
-      bars.forEach((bar) => {
-        const width = bar.getBoundingClientRect().width;
-        barWidths.push(width);
-        if (width < minWidth) {
-          minWidth = width;
-        }
-      });
-
-      // Apply the minimum width to all bars
-      bars.forEach((bar) => {
-        (bar as HTMLElement).style.width = `${minWidth}px`;
-        (bar as HTMLElement).style.flexGrow = '0';
-        (bar as HTMLElement).style.flexShrink = '0';
-      });
-    }, 100); // Small delay to ensure DOM is ready
-  }
 }
-
-// Register the card with Home Assistant
-declare global {
-  interface Window {
-    customCards: Array<{
-      type: string;
-      name: string;
-      preview?: boolean;
-      description?: string;
-      documentationURL?: string;
-    }>;
-  }
-}
-
-window.customCards = window.customCards || [];
-window.customCards.push({
-  type: 'custom:bar-card',
-  name: 'Bar Card',
-  preview: false,
-  description: 'A customizable progress bar card for Home Assistant',
-  documentationURL: 'https://github.com/custom-cards/bar-card'
-});
